@@ -10,29 +10,25 @@ import com.tech.padawan.financialmanager.user.dto.UserSearchedDTO;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements IUserService{
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtTokenService jwtTokenService;
-
-    @Autowired
-    private UserRepository repository;
-
-    @Autowired
-    private SecurityConfiguration securityConfiguration;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenService jwtTokenService;
+    private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder; // Injete diretamente o PasswordEncoder
 
     @Override
     public List<User> listAll() {
@@ -52,9 +48,15 @@ public class UserService implements IUserService{
                 new UsernamePasswordAuthenticationToken(loginUserDto.email(), loginUserDto.password());
 
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-        User user = (User) authentication.getPrincipal();
-        return new RecoveryJwtTokenDTO(jwtTokenService.generateToken(user));
 
+        // Obter o username/email do UserDetails
+        String email = authentication.getName();
+
+        // Buscar o usuário completo no banco de dados
+        User user = repository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return new RecoveryJwtTokenDTO(jwtTokenService.generateToken(user));
     }
 
         @Override
@@ -62,7 +64,7 @@ public class UserService implements IUserService{
         User user = User.builder()
                 .name(userDTO.name())
                 .email(userDTO.email())
-                .password(securityConfiguration.passwordEncoder().encode(userDTO.password()))
+                .password(passwordEncoder.encode(userDTO.password()))
                 .birthdate(userDTO.birthdate())
                 .roles(List.of(Role.builder().name(userDTO.role()).build()))
                 .balance(0)
