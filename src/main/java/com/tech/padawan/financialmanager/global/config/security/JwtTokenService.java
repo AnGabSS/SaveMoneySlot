@@ -1,4 +1,4 @@
-package com.tech.padawan.financialmanager.user.config;
+package com.tech.padawan.financialmanager.global.config.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

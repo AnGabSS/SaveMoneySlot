@@ -1,6 +1,6 @@
 package com.tech.padawan.financialmanager.user.service;
 
-import com.tech.padawan.financialmanager.user.config.JwtTokenService;
+import com.tech.padawan.financialmanager.global.config.security.JwtTokenService;
 import com.tech.padawan.financialmanager.role.model.Role;
 import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;

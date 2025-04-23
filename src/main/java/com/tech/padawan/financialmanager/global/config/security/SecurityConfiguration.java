@@ -1,4 +1,4 @@
-package com.tech.padawan.financialmanager.user.config;
+package com.tech.padawan.financialmanager.global.config.security;
 
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.CustomUserDetailsService;
