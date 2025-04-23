@@ -36,8 +36,7 @@ public class UserService implements IUserService{
     @Override
     public UserSearchedDTO getById(Long id) {
         User user = Optional.of(repository.findById(id)).get().orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found."));
-        UserSearchedDTO userDTO = UserSearchedDTO.from(user);
-        return userDTO;
+        return UserSearchedDTO.from(user);
     }
 
     @Override
@@ -50,7 +49,7 @@ public class UserService implements IUserService{
         String email = authentication.getName();
 
         User user = repository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         return new RecoveryJwtTokenDTO(jwtTokenService.generateToken(user));
     }

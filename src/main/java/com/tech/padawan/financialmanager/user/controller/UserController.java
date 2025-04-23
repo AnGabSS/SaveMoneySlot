@@ -7,14 +7,14 @@ import com.tech.padawan.financialmanager.user.dto.UserSearchedDTO;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Optional;
-
 
 @RestController
 @RequestMapping("/users")
@@ -41,9 +41,15 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<RecoveryJwtTokenDTO> authenticateUser(@RequestBody LoginUserDTO user){
-        RecoveryJwtTokenDTO token = service.authenticateUser(user);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<Object> authenticateUser(@RequestBody LoginUserDTO user){
+        try{
+            RecoveryJwtTokenDTO token = service.authenticateUser(user);
+            return ResponseEntity.ok(token);
+        } catch (BadCredentialsException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password is incorrect");
+        } catch (InternalAuthenticationServiceException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User Not Found");
+        }
     }
 
 }
