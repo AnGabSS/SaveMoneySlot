@@ -1,4 +1,4 @@
-package com.tech.padawan.financialmanager.config;
+package com.tech.padawan.financialmanager.user.config;
 
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
@@ -7,11 +7,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -23,12 +23,13 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Ignora requisições OPTIONS (pré-flight CORS)
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
@@ -38,16 +39,16 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             try {
                 String token = recoveryToken(request);
                 if (token == null || token.isBlank()) {
-                    throw new RuntimeException("Token não fornecido");
+                    throw new RuntimeException("Missing token");
                 }
 
                 String email = jwtTokenService.getSubjectFromToken(token);
                 User user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                        .orElseThrow(() -> new RuntimeException("User not found"));
 
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
-                        null, // Não inclua a senha no contexto de segurança
+                        null,
                         user.getAuthorities());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -70,8 +71,14 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isEndpointPrivate(HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
-        return !Arrays.asList(SecurityConfiguration.ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED)
-                .contains(requestURI);
+        String path = request.getServletPath();
+        String method = request.getMethod();
+
+        for (String publicEndpoint : SecurityConfiguration.PUBLIC_ENDPOINTS) {
+            if (pathMatcher.match(publicEndpoint, path)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

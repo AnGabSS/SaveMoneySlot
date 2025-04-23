@@ -1,9 +1,8 @@
-package com.tech.padawan.financialmanager.config;
+package com.tech.padawan.financialmanager.user.config;
 
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,11 +26,18 @@ public class SecurityConfiguration {
     private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
 
-    public static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = {
+    public static final String[] PUBLIC_ENDPOINTS = {
             "/users/login",
             "/users",
+            "/swagger-ui.html",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/swagger-resources",
+            "/webjars/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/favicon.ico"
     };
 
     @Bean
@@ -41,8 +47,8 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED).permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().permitAll())
                 .addFilterBefore(new UserAuthenticationFilter(jwtTokenService, userRepository),
                         UsernamePasswordAuthenticationFilter.class)
                 .build();

@@ -29,7 +29,7 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private Date birthdate;
-    private double balance = 0;
+    private double balance;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(name="users_roles",

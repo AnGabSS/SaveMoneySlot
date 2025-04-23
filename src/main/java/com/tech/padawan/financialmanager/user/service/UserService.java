@@ -1,7 +1,6 @@
 package com.tech.padawan.financialmanager.user.service;
 
-import com.tech.padawan.financialmanager.config.JwtTokenService;
-import com.tech.padawan.financialmanager.config.SecurityConfiguration;
+import com.tech.padawan.financialmanager.user.config.JwtTokenService;
 import com.tech.padawan.financialmanager.role.model.Role;
 import com.tech.padawan.financialmanager.user.dto.CreateUserDTO;
 import com.tech.padawan.financialmanager.user.dto.LoginUserDTO;
@@ -11,7 +10,6 @@ import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,7 +26,7 @@ public class UserService implements IUserService{
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtTokenService;
     private final UserRepository repository;
-    private final PasswordEncoder passwordEncoder; // Injete diretamente o PasswordEncoder
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<User> listAll() {
@@ -49,10 +47,8 @@ public class UserService implements IUserService{
 
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
-        // Obter o username/email do UserDetails
         String email = authentication.getName();
 
-        // Buscar o usuário completo no banco de dados
         User user = repository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
