@@ -2,10 +2,7 @@ package com.tech.padawan.financialmanager.user.service;
 
 import com.tech.padawan.financialmanager.user.config.JwtTokenService;
 import com.tech.padawan.financialmanager.role.model.Role;
-import com.tech.padawan.financialmanager.user.dto.CreateUserDTO;
-import com.tech.padawan.financialmanager.user.dto.LoginUserDTO;
-import com.tech.padawan.financialmanager.user.dto.RecoveryJwtTokenDTO;
-import com.tech.padawan.financialmanager.user.dto.UserSearchedDTO;
+import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
@@ -68,8 +65,12 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public User update(Long id, User user) {
-        return repository.save(user);
+    public User update(Long id, UpdateUserDTO user) {
+        User oldUser = repository.getReferenceById(id);
+        oldUser.setName(user.name());
+        oldUser.setEmail(user.email());
+        oldUser.setBirthdate(user.birthdate());
+        return repository.save(oldUser);
     }
 
     @Override

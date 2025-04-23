@@ -1,9 +1,6 @@
 package com.tech.padawan.financialmanager.user.service;
 
-import com.tech.padawan.financialmanager.user.dto.CreateUserDTO;
-import com.tech.padawan.financialmanager.user.dto.LoginUserDTO;
-import com.tech.padawan.financialmanager.user.dto.RecoveryJwtTokenDTO;
-import com.tech.padawan.financialmanager.user.dto.UserSearchedDTO;
+import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;
 
 import java.util.List;
@@ -14,6 +11,6 @@ public interface IUserService {
     UserSearchedDTO getById(Long id);
     RecoveryJwtTokenDTO authenticateUser(LoginUserDTO userDTO);
     User create(CreateUserDTO user);
-    User update(Long id,User user);
+    User update(Long id, UpdateUserDTO user);
     String delete(Long id);
 }

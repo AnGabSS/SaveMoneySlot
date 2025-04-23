@@ -1,11 +1,9 @@
 package com.tech.padawan.financialmanager.user.controller;
 
-import com.tech.padawan.financialmanager.user.dto.CreateUserDTO;
-import com.tech.padawan.financialmanager.user.dto.LoginUserDTO;
-import com.tech.padawan.financialmanager.user.dto.RecoveryJwtTokenDTO;
-import com.tech.padawan.financialmanager.user.dto.UserSearchedDTO;
+import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.service.UserService;
+import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +47,19 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password is incorrect");
         } catch (InternalAuthenticationServiceException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User Not Found");
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UpdateUserDTO user){
+        try{
+            User userCreated = service.update(id, user);
+            UserSearchedDTO userDTO = UserSearchedDTO.from(userCreated);
+            return ResponseEntity.ok(userDTO);
+        }catch (UserNotFoundException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
