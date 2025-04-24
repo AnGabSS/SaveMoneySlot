@@ -2,12 +2,14 @@ package com.tech.padawan.financialmanager.user.model;
 
 import com.tech.padawan.financialmanager.role.model.Role;
 import com.tech.padawan.financialmanager.role.model.RoleType;
+import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +38,10 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name="role_id"))
     private List<Role> roles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> transactions = new ArrayList<>();
+
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.getRoles()
