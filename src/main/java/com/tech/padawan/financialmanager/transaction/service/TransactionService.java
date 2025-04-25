@@ -1,28 +1,37 @@
 package com.tech.padawan.financialmanager.transaction.service;
 
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
+import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class TransactionService implements ITransactionService{
-
+    @Autowired
     private TransactionRepository repository;
+    @Autowired
     private UserRepository userRepository;
 
     @Override
-    public List<Transaction> findAll() {
-        return repository.findAll();
+    public List<SearchedTransactionDTO> findAll() {
+        List<Transaction> list = repository.findAll();
+        return list.stream().map(SearchedTransactionDTO::from).toList();
     }
 
     @Override
-    public Transaction getById(Long id) {
-        return Optional.of(repository.findById(id)).get().orElseThrow(() -> new TransactionNotFound("Transaction with id " + id + " not found."));
+    public SearchedTransactionDTO getById(Long id) {
+        Transaction transaction =  Optional.of(repository.findById(id)).get().orElseThrow(() -> new TransactionNotFound("Transaction with id " + id + " not found."));
+        return SearchedTransactionDTO.from(transaction);
     }
 
     @Override
@@ -32,6 +41,7 @@ public class TransactionService implements ITransactionService{
                 .value(transactionDTO.value())
                 .description(transactionDTO.description())
                 .type(transactionDTO.type())
+                .createdAt(new Date())
                 .user(user)
                 .build();
         return repository.save(transaction);

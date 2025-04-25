@@ -1,6 +1,7 @@
 package com.tech.padawan.financialmanager.transaction.controller;
 
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
+import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.service.TransactionService;
@@ -23,7 +24,7 @@ public class TransactionController {
     private TransactionService service;
 
     @GetMapping
-    public ResponseEntity<List<Transaction>> findAll(){
+    public ResponseEntity<List<SearchedTransactionDTO>> findAll(){
         return ResponseEntity.ok(service.findAll());
     }
 
@@ -37,10 +38,10 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<Transaction> create(@RequestBody CreateTransactionDTO transactionDTO){
+    public ResponseEntity<SearchedTransactionDTO> create(@RequestBody CreateTransactionDTO transactionDTO){
         Transaction transaction = service.create(transactionDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(transaction.getId()).toUri();
-        return ResponseEntity.created(uri).build();
+        return ResponseEntity.created(uri).body(SearchedTransactionDTO.from(transaction));
     }
 
     @PutMapping("/{id}")
