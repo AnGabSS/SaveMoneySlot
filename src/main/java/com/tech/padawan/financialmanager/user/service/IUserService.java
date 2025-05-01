@@ -13,4 +13,7 @@ public interface IUserService {
     User create(CreateUserDTO user);
     User update(Long id, UpdateUserDTO user);
     String delete(Long id);
+    User updateUserCompleted(User user);
+    User getUserEntityById(Long id);
+
 }

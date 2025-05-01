@@ -4,10 +4,16 @@ import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
+import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
+import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategy;
+import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategyFactory;
+import com.tech.padawan.financialmanager.user.dto.UserSearchedDTO;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
+import com.tech.padawan.financialmanager.user.service.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +26,7 @@ public class TransactionService implements ITransactionService{
     @Autowired
     private TransactionRepository repository;
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Override
     public List<SearchedTransactionDTO> findAll() {
@@ -34,9 +40,16 @@ public class TransactionService implements ITransactionService{
         return SearchedTransactionDTO.from(transaction);
     }
 
+    @Transactional
     @Override
     public Transaction create(CreateTransactionDTO transactionDTO) {
-        User user = userRepository.getReferenceById(transactionDTO.userId());
+        User user = userService.getUserEntityById(transactionDTO.userId());
+
+        TransactionStrategy strategy = TransactionStrategyFactory.getStrategy(transactionDTO.type());
+        user = strategy.apply(user, transactionDTO.value());
+
+        userService.updateUserCompleted(user);
+
         Transaction transaction = Transaction.builder()
                 .value(transactionDTO.value())
                 .description(transactionDTO.description())
@@ -44,16 +57,33 @@ public class TransactionService implements ITransactionService{
                 .createdAt(new Date())
                 .user(user)
                 .build();
+
         return repository.save(transaction);
     }
 
+
     @Override
-    public Transaction update(Long id, UpdateTransactionDTO transactionDTO) {
+    public SearchedTransactionDTO update(Long id, UpdateTransactionDTO transactionDTO) {
         Transaction transaction = repository.getReferenceById(id);
+
+        User user = userService.getUserEntityById(transaction.getUser().getId());
+
+        // Revert the old transaction value
+        TransactionStrategy strategyForTheOldTransaction = TransactionStrategyFactory.getStrategy(transaction.getType());
+        user = strategyForTheOldTransaction.revert(user, transaction.getValue());
+
+        //Apply the new transaction value
+        TransactionStrategy strategy = TransactionStrategyFactory.getStrategy(transactionDTO.type());
+        user = strategy.apply(user, transactionDTO.value());
+
+        userService.updateUserCompleted(user);
+
         transaction.setValue(transactionDTO.value());
         transaction.setDescription(transactionDTO.description());
         transaction.setType(transactionDTO.type());
-        return repository.save(transaction);
+
+        Transaction transactionUpdated = repository.save(transaction);
+        return SearchedTransactionDTO.from(transactionUpdated);
     }
 
     @Override

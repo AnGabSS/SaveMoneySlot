@@ -78,4 +78,17 @@ public class UserService implements IUserService{
         repository.deleteById(id);
         return "User deleted";
     }
+
+    @Override
+    public User updateUserCompleted(User user) {
+        return repository.save(user);
+    }
+
+
+    @Override
+    public User getUserEntityById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found."));
+    }
+
 }

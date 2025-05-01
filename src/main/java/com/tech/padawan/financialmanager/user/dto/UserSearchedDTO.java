@@ -10,6 +10,7 @@ public record UserSearchedDTO(
         String name,
         String email,
         Date birthdate,
+        double balance,
         RoleType role
 ) {
     public static UserSearchedDTO from(User user) {
@@ -18,6 +19,7 @@ public record UserSearchedDTO(
                 user.getName(),
                 user.getEmail(),
                 user.getBirthdate(),
+                user.getBalance(),
                 user.getLastAddRole()
         );
     }

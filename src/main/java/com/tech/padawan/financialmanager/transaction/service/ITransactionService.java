@@ -11,6 +11,6 @@ public interface ITransactionService {
     List<SearchedTransactionDTO> findAll();
     SearchedTransactionDTO getById(Long id);
     Transaction create(CreateTransactionDTO transactionDTO);
-    Transaction update(Long id, UpdateTransactionDTO transactionDTO);
+    SearchedTransactionDTO update(Long id, UpdateTransactionDTO transactionDTO);
     String delete(Long id);
 }

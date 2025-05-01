@@ -38,16 +38,24 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<SearchedTransactionDTO> create(@RequestBody CreateTransactionDTO transactionDTO){
-        Transaction transaction = service.create(transactionDTO);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(transaction.getId()).toUri();
-        return ResponseEntity.created(uri).body(SearchedTransactionDTO.from(transaction));
+    public ResponseEntity<Object> create(@RequestBody CreateTransactionDTO transactionDTO){
+        try{
+            Transaction transaction = service.create(transactionDTO);
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(transaction.getId()).toUri();
+            return ResponseEntity.created(uri).body(SearchedTransactionDTO.from(transaction));
+        } catch (UserNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Transaction> update(@PathVariable Long id, @RequestBody UpdateTransactionDTO transactionDTO){
-        Transaction newTransation = service.update(id, transactionDTO);
-        return ResponseEntity.ok(newTransation);
+    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody UpdateTransactionDTO transactionDTO){
+        try{
+            SearchedTransactionDTO newTransation = service.update(id, transactionDTO);
+            return ResponseEntity.ok(newTransation);
+        } catch (UserNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
