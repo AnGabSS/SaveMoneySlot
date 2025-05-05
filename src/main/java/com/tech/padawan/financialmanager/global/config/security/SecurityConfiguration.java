@@ -40,6 +40,10 @@ public class SecurityConfiguration {
             "/favicon.ico"
     };
 
+    public static final String[] ADMIN_ENDPOINTS = {
+            "/transaction"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http

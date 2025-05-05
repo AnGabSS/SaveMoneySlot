@@ -4,10 +4,12 @@ import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
+import com.tech.padawan.financialmanager.transaction.service.ITransactionService;
 import com.tech.padawan.financialmanager.transaction.service.TransactionService;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +23,16 @@ import java.util.List;
 public class TransactionController {
 
     @Autowired
-    private TransactionService service;
+    private ITransactionService service;
 
     @GetMapping
-    public ResponseEntity<List<SearchedTransactionDTO>> findAll(){
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<SearchedTransactionDTO>> findAll(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "4") int size,
+            @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
+            @RequestParam(value = "direction", defaultValue = "ASC") String direction
+    ){
+        return ResponseEntity.ok(service.findAll(page, size, orderBy, direction).getContent());
     }
 
     @GetMapping("/{id}")
@@ -61,6 +68,17 @@ public class TransactionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id){
         return ResponseEntity.ok(service.delete(id));
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<SearchedTransactionDTO>> findAllByUser(
+            @PathVariable Long id,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "4") int size,
+            @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
+            @RequestParam(value = "direction", defaultValue = "ASC") String direction
+    ){
+        return ResponseEntity.ok(service.findAllByUser(id, page, size, orderBy, direction).getContent());
     }
 }
 

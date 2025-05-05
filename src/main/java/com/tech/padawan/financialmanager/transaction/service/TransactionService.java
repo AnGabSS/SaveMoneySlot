@@ -15,6 +15,9 @@ import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -29,9 +32,10 @@ public class TransactionService implements ITransactionService{
     private UserService userService;
 
     @Override
-    public List<SearchedTransactionDTO> findAll() {
-        List<Transaction> list = repository.findAll();
-        return list.stream().map(SearchedTransactionDTO::from).toList();
+    public Page<SearchedTransactionDTO> findAll(int page, int size, String orderBy, String direction) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+        Page<Transaction> list = repository.findAll(pageRequest);
+        return list.map(SearchedTransactionDTO::from);
     }
 
     @Override
@@ -91,4 +95,12 @@ public class TransactionService implements ITransactionService{
         repository.deleteById(id);
         return "Transaction deleted";
     }
+
+    @Override
+    public Page<SearchedTransactionDTO> findAllByUser(long userid, int page, int size, String orderBy, String direction) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+        Page<Transaction> list = repository.findAllByUserId(pageRequest, userid);
+        return list.map(SearchedTransactionDTO::from);
+    }
+
 }
