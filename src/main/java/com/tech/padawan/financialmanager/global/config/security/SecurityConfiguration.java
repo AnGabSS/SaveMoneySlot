@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.global.config.security;
 
+import com.tech.padawan.financialmanager.role.model.RoleType;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,7 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(ADMIN_ENDPOINTS).hasAuthority("ADMIN")
                         .anyRequest().permitAll())
                 .addFilterBefore(new UserAuthenticationFilter(jwtTokenService, userRepository),
                         UsernamePasswordAuthenticationFilter.class)
