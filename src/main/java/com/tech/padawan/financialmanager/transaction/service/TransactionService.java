@@ -4,14 +4,11 @@ import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
-import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
 import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategy;
 import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategyFactory;
-import com.tech.padawan.financialmanager.user.dto.UserSearchedDTO;
 import com.tech.padawan.financialmanager.user.model.User;
-import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +18,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 @Service
