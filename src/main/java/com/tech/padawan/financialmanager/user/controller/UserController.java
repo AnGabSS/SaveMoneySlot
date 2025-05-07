@@ -2,6 +2,7 @@ package com.tech.padawan.financialmanager.user.controller;
 
 import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;
+import com.tech.padawan.financialmanager.user.service.IUserService;
 import com.tech.padawan.financialmanager.user.service.UserService;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import java.net.URI;
 public class UserController {
 
     @Autowired
-    private UserService service;
+    private IUserService service;
 
     @GetMapping("/{id}")
     public ResponseEntity<UserSearchedDTO> findById(@PathVariable Long id){

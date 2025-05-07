@@ -1,6 +1,5 @@
 package com.tech.padawan.financialmanager.global.config.security;
 
-import com.tech.padawan.financialmanager.role.model.RoleType;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
