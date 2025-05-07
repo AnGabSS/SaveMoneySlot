@@ -1,5 +1,7 @@
 package com.tech.padawan.financialmanager.goal.dto;
 
+import com.tech.padawan.financialmanager.goal.model.Goal;
+import com.tech.padawan.financialmanager.user.model.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +19,21 @@ public record SearchedGoalDTO(
         Date deadline,
         boolean isCompleted,
         Date createdAt,
-        Date updatedAt
+        Date updatedAt,
+        User user
 ) {
+    public static SearchedGoalDTO from(Goal goal){
+        return new SearchedGoalDTO(
+                goal.getId(),
+                goal.getName(),
+                goal.getTargetAmount(),
+                goal.getSavedAmount(),
+                goal.getReason(),
+                goal.getDeadline(),
+                goal.isCompleted(),
+                goal.getCreatedAt(),
+                goal.getUpdatedAt(),
+                goal.getUser()
+        );
+    }
 }

@@ -1,15 +1,18 @@
 package com.tech.padawan.financialmanager.goal.service;
 
+import com.tech.padawan.financialmanager.goal.dto.CreateGoalDTO;
 import com.tech.padawan.financialmanager.goal.dto.SearchedGoalDTO;
+import com.tech.padawan.financialmanager.goal.dto.UpdateGoalDTO;
 import com.tech.padawan.financialmanager.goal.model.Goal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
 public interface IGoalService {
-    Page<SearchedGoalDTO> findAll(Pageable pageable);
+    Page<SearchedGoalDTO> findAll(int page, int size, String orderBy, String direction);
     SearchedGoalDTO findById(Long id);
-    Goal save(Goal goal);
-    Page<SearchedGoalDTO> findAllByUserId(Pageable pageable, Long userId);
+    Goal save(CreateGoalDTO goal);
+    SearchedGoalDTO update(Long id, UpdateGoalDTO goal);
+    Page<SearchedGoalDTO> findAllByUserId(Long userId, int page, int size, String orderBy, String direction);
     void deleteById(Long id);
 }

@@ -7,6 +7,7 @@ public record CreateGoalDTO(
         double targetAmount,
         double savedAmount,
         String reason,
-        Date deadline
+        Date deadline,
+        Long userId
 ) {
 }

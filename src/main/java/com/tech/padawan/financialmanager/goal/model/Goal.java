@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.goal.model;
 
+import com.tech.padawan.financialmanager.user.model.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +30,8 @@ public class Goal {
     private boolean isCompleted;
     private Date createdAt;
     private Date updatedAt;
+    @ManyToOne
+    private User user;
 
     @PrePersist
     protected void onCreate(){
