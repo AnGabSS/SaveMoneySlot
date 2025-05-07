@@ -75,6 +75,7 @@ public class UserService implements IUserService{
 
     @Override
     public String delete(Long id) {
+        this.getById(id);
         repository.deleteById(id);
         return "User deleted";
     }

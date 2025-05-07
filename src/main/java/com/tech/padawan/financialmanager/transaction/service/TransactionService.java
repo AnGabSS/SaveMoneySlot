@@ -88,6 +88,7 @@ public class TransactionService implements ITransactionService{
 
     @Override
     public String delete(Long id) {
+        this.getById(id);
         repository.deleteById(id);
         return "Transaction deleted";
     }

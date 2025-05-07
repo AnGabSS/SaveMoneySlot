@@ -1,14 +1,14 @@
-package com.tech.padawan.financialmanager.transaction.controller;
+package com.tech.padawan.financialmanager.goal.controller;
 
+import com.tech.padawan.financialmanager.goal.dto.CreateGoalDTO;
+import com.tech.padawan.financialmanager.goal.dto.SearchedGoalDTO;
+import com.tech.padawan.financialmanager.goal.dto.UpdateGoalDTO;
+import com.tech.padawan.financialmanager.goal.model.Goal;
+import com.tech.padawan.financialmanager.goal.service.IGoalService;
 import com.tech.padawan.financialmanager.goal.service.exception.GoalNotFoundException;
-import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
-import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
-import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
-import com.tech.padawan.financialmanager.transaction.model.Transaction;
-import com.tech.padawan.financialmanager.transaction.service.ITransactionService;
-import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,51 +18,47 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/transaction")
-public class TransactionController {
+@RequestMapping("/goals")
+public class GoalController {
 
     @Autowired
-    private ITransactionService service;
+    private IGoalService service;
 
     @GetMapping
-    public ResponseEntity<List<SearchedTransactionDTO>> findAll(
+    public ResponseEntity<Page<SearchedGoalDTO>> findAll(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "4") int size,
             @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ){
-        return ResponseEntity.ok(service.findAll(page, size, orderBy, direction).getContent());
+        return ResponseEntity.ok(service.findAll(page, size, orderBy,direction));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> findById(@PathVariable Long id){
         try{
             return ResponseEntity.ok(service.getById(id));
-        } catch (TransactionNotFound e){
+        } catch (GoalNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody CreateTransactionDTO transactionDTO){
+    public ResponseEntity<SearchedGoalDTO> create(@RequestBody CreateGoalDTO goalDTO){
+        Goal goalCreated = service.create(goalDTO);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(goalCreated.getId()).toUri();
+        return ResponseEntity.created(uri).body(SearchedGoalDTO.from(goalCreated));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody UpdateGoalDTO goalDTO){
         try{
-            Transaction transaction = service.create(transactionDTO);
-            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(transaction.getId()).toUri();
-            return ResponseEntity.created(uri).body(SearchedTransactionDTO.from(transaction));
+            return ResponseEntity.ok(service.update(id, goalDTO));
         } catch (UserNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody UpdateTransactionDTO transactionDTO){
-        try{
-            SearchedTransactionDTO newTransation = service.update(id, transactionDTO);
-            return ResponseEntity.ok(newTransation);
-        } catch (TransactionNotFound e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id){
@@ -74,14 +70,14 @@ public class TransactionController {
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<SearchedTransactionDTO>> findAllByUser(
+    public ResponseEntity<List<SearchedGoalDTO>> findAllByUser(
             @PathVariable Long id,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "4") int size,
             @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ){
-        return ResponseEntity.ok(service.findAllByUser(id, page, size, orderBy, direction).getContent());
+        return ResponseEntity.ok(service.findAllByUserId(id, page, size, orderBy, direction).getContent());
     }
-}
 
+}

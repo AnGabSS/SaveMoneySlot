@@ -33,13 +33,13 @@ public class GoalService implements IGoalService {
     }
 
     @Override
-    public SearchedGoalDTO findById(Long id) {
+    public SearchedGoalDTO getById(Long id) {
         Goal goal = Optional.of(repository.findById(id).orElseThrow(() -> new GoalNotFoundException("Goal with id " + id + " not found."))).get();
         return SearchedGoalDTO.from(goal);
     }
 
     @Override
-    public Goal save(CreateGoalDTO goalDTO) {
+    public Goal create(CreateGoalDTO goalDTO) {
         User userFind = userService.getUserEntityById(goalDTO.userId());
         Goal goal = Goal.builder()
                 .name(goalDTO.name())
@@ -73,7 +73,9 @@ public class GoalService implements IGoalService {
     }
 
     @Override
-    public void deleteById(Long id) {
-      repository.deleteById(id);
+    public String delete(Long id) {
+        this.getById(id);
+        repository.deleteById(id);
+        return "Goal deleted";
     }
 }

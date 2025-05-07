@@ -10,9 +10,9 @@ import org.springframework.data.domain.Pageable;
 
 public interface IGoalService {
     Page<SearchedGoalDTO> findAll(int page, int size, String orderBy, String direction);
-    SearchedGoalDTO findById(Long id);
-    Goal save(CreateGoalDTO goal);
+    SearchedGoalDTO getById(Long id);
+    Goal create(CreateGoalDTO goal);
     SearchedGoalDTO update(Long id, UpdateGoalDTO goal);
     Page<SearchedGoalDTO> findAllByUserId(Long userId, int page, int size, String orderBy, String direction);
-    void deleteById(Long id);
+    String delete(Long id);
 }
