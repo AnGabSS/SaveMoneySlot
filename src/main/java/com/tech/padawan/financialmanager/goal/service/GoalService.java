@@ -8,6 +8,7 @@ import com.tech.padawan.financialmanager.goal.repository.GoalRepository;
 import com.tech.padawan.financialmanager.goal.service.exception.GoalNotFoundException;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.service.IUserService;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -77,5 +78,13 @@ public class GoalService implements IGoalService {
         this.getById(id);
         repository.deleteById(id);
         return "Goal deleted";
+    }
+
+    @Override
+    public SearchedGoalDTO updateSaveAmount(Long id, double newSaveAmount) {
+        Goal oldGoal = Optional.of(repository.findById(id).orElseThrow(() -> new GoalNotFoundException("Goal with id " + id + " not found."))).get();;
+        oldGoal.setSavedAmount(newSaveAmount);
+        Goal newGoal = repository.save(oldGoal);
+        return SearchedGoalDTO.from(newGoal);
     }
 }

@@ -15,4 +15,5 @@ public interface IGoalService {
     SearchedGoalDTO update(Long id, UpdateGoalDTO goal);
     Page<SearchedGoalDTO> findAllByUserId(Long userId, int page, int size, String orderBy, String direction);
     String delete(Long id);
+    SearchedGoalDTO updateSaveAmount(Long id, double newSaveAmount);
 }

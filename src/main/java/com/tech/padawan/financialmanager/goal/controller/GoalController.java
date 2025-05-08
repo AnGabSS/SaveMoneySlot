@@ -3,10 +3,14 @@ package com.tech.padawan.financialmanager.goal.controller;
 import com.tech.padawan.financialmanager.goal.dto.CreateGoalDTO;
 import com.tech.padawan.financialmanager.goal.dto.SearchedGoalDTO;
 import com.tech.padawan.financialmanager.goal.dto.UpdateGoalDTO;
+import com.tech.padawan.financialmanager.goal.dto.UpdateSaveAmountDTO;
 import com.tech.padawan.financialmanager.goal.model.Goal;
 import com.tech.padawan.financialmanager.goal.service.IGoalService;
 import com.tech.padawan.financialmanager.goal.service.exception.GoalNotFoundException;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -79,6 +83,15 @@ public class GoalController {
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ){
         return ResponseEntity.ok(service.findAllByUserId(id, page, size, orderBy, direction).getContent());
+    }
+
+    @PutMapping("/{id}/saveamount")
+    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody @Valid UpdateSaveAmountDTO dto){
+        try{
+            return ResponseEntity.ok(service.updateSaveAmount(id, dto.value()));
+        } catch (UserNotFoundException | GoalNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
 }

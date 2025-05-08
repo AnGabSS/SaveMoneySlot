@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Date;
 
@@ -21,9 +22,19 @@ public record SearchedGoalDTO(
         boolean isCompleted,
         Date createdAt,
         Date updatedAt,
-        UserSearchedDTO user
+        String user
 ) {
-    public static SearchedGoalDTO from(Goal goal){
+    public static SearchedGoalDTO from(Goal goal) {
+        Long userId = goal.getUser() != null ? goal.getUser().getId() : null;
+
+        String userUrl = userId != null
+                ? ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/user/{id}")
+                .buildAndExpand(userId)
+                .toUriString()
+                : null;
+
         return new SearchedGoalDTO(
                 goal.getId(),
                 goal.getName(),
@@ -34,7 +45,8 @@ public record SearchedGoalDTO(
                 goal.isCompleted(),
                 goal.getCreatedAt(),
                 goal.getUpdatedAt(),
-                UserSearchedDTO.from(goal.getUser())
+                userUrl
         );
     }
+
 }

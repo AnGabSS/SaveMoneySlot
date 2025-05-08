@@ -40,7 +40,7 @@ public class Goal {
     private Date createdAt;
     private Date updatedAt;
     @ManyToOne
-    @NotEmpty(message = "User is required")
+    @NotNull(message = "User is required")
     private User user;
 
     @PrePersist
