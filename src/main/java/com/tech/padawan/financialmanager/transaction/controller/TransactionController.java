@@ -8,6 +8,7 @@ import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.service.ITransactionService;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody CreateTransactionDTO transactionDTO){
+    public ResponseEntity<Object> create(@RequestBody @Valid CreateTransactionDTO transactionDTO){
         try{
             Transaction transaction = service.create(transactionDTO);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(transaction.getId()).toUri();
@@ -55,7 +56,7 @@ public class TransactionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody UpdateTransactionDTO transactionDTO){
+    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody @Valid UpdateTransactionDTO transactionDTO){
         try{
             SearchedTransactionDTO newTransation = service.update(id, transactionDTO);
             return ResponseEntity.ok(newTransation);

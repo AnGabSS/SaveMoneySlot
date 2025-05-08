@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -44,17 +45,17 @@ public class GoalController {
     }
 
     @PostMapping
-    public ResponseEntity<SearchedGoalDTO> create(@RequestBody CreateGoalDTO goalDTO){
+    public ResponseEntity<SearchedGoalDTO> create(@RequestBody @Validated CreateGoalDTO goalDTO){
         Goal goalCreated = service.create(goalDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(goalCreated.getId()).toUri();
         return ResponseEntity.created(uri).body(SearchedGoalDTO.from(goalCreated));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody UpdateGoalDTO goalDTO){
+    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody @Validated UpdateGoalDTO goalDTO){
         try{
             return ResponseEntity.ok(service.update(id, goalDTO));
-        } catch (UserNotFoundException e){
+        } catch (UserNotFoundException | GoalNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }

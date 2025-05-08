@@ -3,6 +3,10 @@ package com.tech.padawan.financialmanager.goal.model;
 import com.tech.padawan.financialmanager.user.model.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -19,8 +23,13 @@ public class Goal {
 
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+
+    @NotBlank(message = "Name is required")
     private String name;
+    @NotNull(message = "Target Amount is required")
+    @Min(value = 0, message = "Target cannot be a negative number")
     private double targetAmount;
+    @NotNull(message = "Saved Amount is required")
     private double savedAmount;
     @Nullable
     private String reason;
@@ -31,6 +40,7 @@ public class Goal {
     private Date createdAt;
     private Date updatedAt;
     @ManyToOne
+    @NotEmpty(message = "User is required")
     private User user;
 
     @PrePersist

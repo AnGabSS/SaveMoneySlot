@@ -2,6 +2,10 @@ package com.tech.padawan.financialmanager.transaction.model;
 
 import com.tech.padawan.financialmanager.user.model.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.Date;
@@ -17,12 +21,17 @@ public class Transaction {
 
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+    @NotNull(message = "Value is required")
+    @Min(value = 0, message = "Value be a negative number")
     private double value;
+    @NotBlank(message = "Description is required")
     private String description;
+    @NotNull(message = "Type is required")
     private TransactionType type;
     private Date createdAt;
 
     @ManyToOne
+    @NotEmpty(message = "User is required")
     private User user;
 
 }

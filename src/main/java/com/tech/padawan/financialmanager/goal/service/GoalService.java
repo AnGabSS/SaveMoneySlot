@@ -55,7 +55,7 @@ public class GoalService implements IGoalService {
 
     @Override
     public SearchedGoalDTO update(Long id, UpdateGoalDTO goal) {
-        Goal oldGoal = repository.getReferenceById(id);
+        Goal oldGoal = Optional.of(repository.findById(id).orElseThrow(() -> new GoalNotFoundException("Goal with id " + id + " not found."))).get();;
         oldGoal.setName(goal.name());
         oldGoal.setTargetAmount(goal.targetAmount());
         oldGoal.setSavedAmount(goal.savedAmount());

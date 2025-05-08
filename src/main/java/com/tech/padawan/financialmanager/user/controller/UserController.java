@@ -5,6 +5,7 @@ import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.service.IUserService;
 import com.tech.padawan.financialmanager.user.service.UserService;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class UserController {
     }
     
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody CreateUserDTO user){
+    public ResponseEntity<?> save(@RequestBody @Valid CreateUserDTO user){
         try{
             User userCreated = service.create(user);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(userCreated.getId()).toUri();
