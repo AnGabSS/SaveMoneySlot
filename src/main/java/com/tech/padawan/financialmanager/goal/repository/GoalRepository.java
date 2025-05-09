@@ -1,7 +1,6 @@
 package com.tech.padawan.financialmanager.goal.repository;
 
 import com.tech.padawan.financialmanager.goal.model.Goal;
-import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

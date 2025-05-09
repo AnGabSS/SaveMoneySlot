@@ -24,16 +24,22 @@ public record SearchedGoalDTO(
         Date updatedAt,
         String user
 ) {
+
     public static SearchedGoalDTO from(Goal goal) {
+        return from(goal, true);
+    }
+
+    public static SearchedGoalDTO from(Goal goal, boolean includeUserUrl) {
         Long userId = goal.getUser() != null ? goal.getUser().getId() : null;
 
-        String userUrl = userId != null
-                ? ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .path("/user/{id}")
-                .buildAndExpand(userId)
-                .toUriString()
-                : null;
+        String userUrl = null;
+        if (includeUserUrl && userId != null) {
+            userUrl = ServletUriComponentsBuilder
+                    .fromCurrentContextPath()
+                    .path("/user/{id}")
+                    .buildAndExpand(userId)
+                    .toUriString();
+        }
 
         return new SearchedGoalDTO(
                 goal.getId(),
@@ -48,5 +54,6 @@ public record SearchedGoalDTO(
                 userUrl
         );
     }
+
 
 }
