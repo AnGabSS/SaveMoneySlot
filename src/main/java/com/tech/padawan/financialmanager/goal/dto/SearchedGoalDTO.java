@@ -1,13 +1,6 @@
 package com.tech.padawan.financialmanager.goal.dto;
 
 import com.tech.padawan.financialmanager.goal.model.Goal;
-import com.tech.padawan.financialmanager.user.dto.UserSearchedDTO;
-import com.tech.padawan.financialmanager.user.model.User;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Date;
@@ -34,11 +27,15 @@ public record SearchedGoalDTO(
 
         String userUrl = null;
         if (includeUserUrl && userId != null) {
-            userUrl = ServletUriComponentsBuilder
-                    .fromCurrentContextPath()
-                    .path("/user/{id}")
-                    .buildAndExpand(userId)
-                    .toUriString();
+            try {
+                userUrl = ServletUriComponentsBuilder
+                        .fromCurrentContextPath()
+                        .path("/user/{id}")
+                        .buildAndExpand(userId)
+                        .toUriString();
+            } catch (IllegalStateException e) {
+                userUrl = null;
+            }
         }
 
         return new SearchedGoalDTO(
@@ -54,6 +51,4 @@ public record SearchedGoalDTO(
                 userUrl
         );
     }
-
-
 }
