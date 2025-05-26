@@ -9,8 +9,6 @@ import com.tech.padawan.financialmanager.goal.service.IGoalService;
 import com.tech.padawan.financialmanager.goal.service.exception.GoalNotFoundException;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

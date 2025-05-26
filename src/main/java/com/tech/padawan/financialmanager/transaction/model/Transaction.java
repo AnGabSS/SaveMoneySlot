@@ -26,9 +26,11 @@ public class Transaction {
     private double value;
     @NotBlank(message = "Description is required")
     private String description;
-    @NotNull(message = "Type is required")
-    private TransactionType type;
     private Date createdAt;
+
+    @ManyToOne
+    @NotEmpty(message = "Category is required")
+    private TransactionCategory category;
 
     @ManyToOne
     @NotEmpty(message = "User is required")

@@ -5,6 +5,10 @@ import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.service.IUserService;
 import com.tech.padawan.financialmanager.user.service.UserService;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +27,10 @@ public class UserController {
     @Autowired
     private IUserService service;
 
-    @GetMapping("/{id}")
+    @Operation(summary = "Get a user by ID", responses = {
+            @ApiResponse(responseCode = "200", description = "User found", content = @Content(schema = @Schema(implementation = UserSearchedDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })    @GetMapping("/{id}")
     public ResponseEntity<UserSearchedDTO> findById(@PathVariable Long id){
         return ResponseEntity.ok().body(service.getById(id));
     }
