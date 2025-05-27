@@ -45,7 +45,7 @@ public class TransactionService implements ITransactionService{
     public Transaction create(CreateTransactionDTO transactionDTO) {
         User user = userService.getUserEntityById(transactionDTO.userId());
 
-        TransactionStrategy strategy = TransactionStrategyFactory.getStrategy(transactionDTO.type());
+        TransactionStrategy strategy = TransactionStrategyFactory.getStrategy(transactionDTO.category().getType());
         user = strategy.apply(user, transactionDTO.value());
 
         userService.updateUserCompleted(user);
@@ -53,7 +53,7 @@ public class TransactionService implements ITransactionService{
         Transaction transaction = Transaction.builder()
                 .value(transactionDTO.value())
                 .description(transactionDTO.description())
-                .type(transactionDTO.type())
+                .category(transactionDTO.category())
                 .createdAt(new Date())
                 .user(user)
                 .build();
@@ -69,18 +69,18 @@ public class TransactionService implements ITransactionService{
         User user = userService.getUserEntityById(transaction.getUser().getId());
 
         // Revert the old transaction value
-        TransactionStrategy strategyForTheOldTransaction = TransactionStrategyFactory.getStrategy(transaction.getType());
+        TransactionStrategy strategyForTheOldTransaction = TransactionStrategyFactory.getStrategy(transaction.getCategory().getType());
         user = strategyForTheOldTransaction.revert(user, transaction.getValue());
 
         //Apply the new transaction value
-        TransactionStrategy strategy = TransactionStrategyFactory.getStrategy(transactionDTO.type());
+        TransactionStrategy strategy = TransactionStrategyFactory.getStrategy(transactionDTO.category().getType());
         user = strategy.apply(user, transactionDTO.value());
 
         userService.updateUserCompleted(user);
 
         transaction.setValue(transactionDTO.value());
         transaction.setDescription(transactionDTO.description());
-        transaction.setType(transactionDTO.type());
+        transaction.setCategory(transactionDTO.category());
 
         Transaction transactionUpdated = repository.save(transaction);
         return SearchedTransactionDTO.from(transactionUpdated);

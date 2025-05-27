@@ -1,6 +1,6 @@
 package com.tech.padawan.financialmanager.transaction.dto;
 
-import com.tech.padawan.financialmanager.transaction.model.TransactionType;
+import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,6 +10,6 @@ public record UpdateTransactionDTO(
         double value,
         String description,
         @NotNull(message = "Type is required")
-        TransactionType type
+        TransactionCategory category
 ) {
 }
