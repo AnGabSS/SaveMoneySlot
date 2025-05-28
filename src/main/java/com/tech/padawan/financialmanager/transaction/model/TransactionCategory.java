@@ -22,6 +22,6 @@ public class TransactionCategory {
     @NotNull(message = "Type is required")
     private TransactionType type;
     @ManyToOne
-    @NotEmpty(message = "User is required")
+    @NotNull(message = "User is required")
     private User user;
 }

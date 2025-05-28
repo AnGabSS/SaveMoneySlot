@@ -14,9 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class TrasactionCategoryService implements ITransactionCategoryService{
     @Autowired
     private TransactionCategoryRepository repository;
@@ -40,7 +42,6 @@ public class TrasactionCategoryService implements ITransactionCategoryService{
     @Override
     public TransactionCategory create(CreateTransactionCategoryDTO transactionDTO) {
         User user = userService.getUserEntityById(transactionDTO.userId());
-
         TransactionCategory category = TransactionCategory.builder()
                 .name(transactionDTO.name())
                 .type(transactionDTO.type())
