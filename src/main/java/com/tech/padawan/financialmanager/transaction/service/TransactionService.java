@@ -26,6 +26,8 @@ public class TransactionService implements ITransactionService{
     private TransactionRepository repository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private TransactionBalanceService balanceService;
 
     @Override
     public Page<SearchedTransactionDTO> findAll(int page, int size, String orderBy, String direction) {
@@ -45,8 +47,7 @@ public class TransactionService implements ITransactionService{
     public Transaction create(CreateTransactionDTO transactionDTO) {
         User user = userService.getUserEntityById(transactionDTO.userId());
 
-        TransactionStrategy strategy = TransactionStrategyFactory.getStrategy(transactionDTO.category().getType());
-        user = strategy.apply(user, transactionDTO.value());
+        user = balanceService.applyTransaction(user, transactionDTO.value(), transactionDTO.category().getType());
 
         userService.updateUserCompleted(user);
 
@@ -69,12 +70,10 @@ public class TransactionService implements ITransactionService{
         User user = userService.getUserEntityById(transaction.getUser().getId());
 
         // Revert the old transaction value
-        TransactionStrategy strategyForTheOldTransaction = TransactionStrategyFactory.getStrategy(transaction.getCategory().getType());
-        user = strategyForTheOldTransaction.revert(user, transaction.getValue());
+        user = balanceService.revertTransaction(user, transaction.getValue(), transaction.getCategory().getType());
 
         //Apply the new transaction value
-        TransactionStrategy strategy = TransactionStrategyFactory.getStrategy(transactionDTO.category().getType());
-        user = strategy.apply(user, transactionDTO.value());
+        user = balanceService.applyTransaction(user, transactionDTO.value(), transactionDTO.category().getType());
 
         userService.updateUserCompleted(user);
 
