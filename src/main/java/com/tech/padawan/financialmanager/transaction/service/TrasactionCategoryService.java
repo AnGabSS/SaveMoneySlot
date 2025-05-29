@@ -75,4 +75,10 @@ public class TrasactionCategoryService implements ITransactionCategoryService{
         Page<TransactionCategory> list = repository.findAllByUserId(pageRequest, userid);
         return list.map(SearchedTransactionCategoryDTO::from);
     }
+
+    @Override
+    public TransactionCategory getEntityById(Long id) {
+        TransactionCategory category = Optional.of(repository.findById(id)).get().orElseThrow(() -> new TransactionCategoryNotFound("Transaction Category with id " + id + " not found."));
+        return category;
+    }
 }

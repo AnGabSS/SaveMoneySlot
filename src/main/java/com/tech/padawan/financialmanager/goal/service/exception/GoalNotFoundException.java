@@ -1,6 +1,8 @@
 package com.tech.padawan.financialmanager.goal.service.exception;
 
-public class GoalNotFoundException extends RuntimeException {
+import com.tech.padawan.financialmanager.global.exception.NotFoundException;
+
+public class GoalNotFoundException extends NotFoundException {
     public GoalNotFoundException(String message) {
         super(message);
     }

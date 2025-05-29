@@ -1,13 +1,12 @@
 package com.tech.padawan.financialmanager.transaction.controller;
 
-import com.tech.padawan.financialmanager.goal.service.exception.GoalNotFoundException;
+import com.tech.padawan.financialmanager.global.exception.NotFoundException;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.service.ITransactionService;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
-import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,42 +35,26 @@ public class TransactionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> findById(@PathVariable Long id){
-        try{
+    public ResponseEntity<SearchedTransactionDTO> findById(@PathVariable Long id){
             return ResponseEntity.ok(service.getById(id));
-        } catch (TransactionNotFound e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody @Valid CreateTransactionDTO transactionDTO){
-        try{
+    public ResponseEntity<SearchedTransactionDTO> create(@RequestBody @Valid CreateTransactionDTO transactionDTO){
             Transaction transaction = service.create(transactionDTO);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(transaction.getId()).toUri();
             return ResponseEntity.created(uri).body(SearchedTransactionDTO.from(transaction));
-        } catch (UserNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody @Valid UpdateTransactionDTO transactionDTO){
-        try{
+    public ResponseEntity<SearchedTransactionDTO> update(@PathVariable Long id, @RequestBody @Valid UpdateTransactionDTO transactionDTO){
             SearchedTransactionDTO newTransation = service.update(id, transactionDTO);
             return ResponseEntity.ok(newTransation);
-        } catch (TransactionNotFound e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id){
-        try{
             return ResponseEntity.ok(service.delete(id));
-        } catch (GoalNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @GetMapping("/user/{id}")

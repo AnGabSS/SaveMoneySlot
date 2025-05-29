@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.transaction.controller;
 
+import com.tech.padawan.financialmanager.global.exception.NotFoundException;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionCategoryDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionCategoryDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionCategoryDTO;
@@ -35,42 +36,28 @@ public class TransactionCategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> findById(@PathVariable Long id) {
-        try {
+    public ResponseEntity<SearchedTransactionCategoryDTO> findById(@PathVariable Long id) {
             return ResponseEntity.ok(service.getById(id));
-        } catch (TransactionCategoryNotFound e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody @Valid CreateTransactionCategoryDTO categoryDTO) {
-        try {
+    public ResponseEntity<SearchedTransactionCategoryDTO> create(@RequestBody @Valid CreateTransactionCategoryDTO categoryDTO) {
             TransactionCategory category = service.create(categoryDTO);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(category.getId()).toUri();
             return ResponseEntity.created(uri).body(SearchedTransactionCategoryDTO.from(category));
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody @Valid UpdateTransactionCategoryDTO categoryDTO) {
-        try {
+    public ResponseEntity<SearchedTransactionCategoryDTO> update(@PathVariable Long id, @RequestBody @Valid UpdateTransactionCategoryDTO categoryDTO) {
             SearchedTransactionCategoryDTO newCategory = service.update(id, categoryDTO);
             return ResponseEntity.ok(newCategory);
-        } catch (TransactionCategoryNotFound e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
-        try {
             return ResponseEntity.ok(service.delete(id));
-        } catch (TransactionCategoryNotFound e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @GetMapping("/user/{id}")

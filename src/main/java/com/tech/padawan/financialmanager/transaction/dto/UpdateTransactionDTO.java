@@ -9,7 +9,7 @@ public record UpdateTransactionDTO(
         @Min(value = 0, message = "Value most be a positive number")
         double value,
         String description,
-        @NotNull(message = "Type is required")
-        TransactionCategory category
+        @NotNull(message = "Category is required")
+        Long categoryId
 ) {
 }

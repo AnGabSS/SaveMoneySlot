@@ -4,6 +4,7 @@ import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
+import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
 import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategy;
@@ -28,6 +29,8 @@ public class TransactionService implements ITransactionService{
     private UserService userService;
     @Autowired
     private TransactionBalanceService balanceService;
+    @Autowired
+    private ITransactionCategoryService categoryService;
 
     @Override
     public Page<SearchedTransactionDTO> findAll(int page, int size, String orderBy, String direction) {
@@ -46,15 +49,16 @@ public class TransactionService implements ITransactionService{
     @Override
     public Transaction create(CreateTransactionDTO transactionDTO) {
         User user = userService.getUserEntityById(transactionDTO.userId());
+        TransactionCategory category = categoryService.getEntityById(transactionDTO.categoryId());
 
-        user = balanceService.applyTransaction(user, transactionDTO.value(), transactionDTO.category().getType());
+        user = balanceService.applyTransaction(user, transactionDTO.value(), category.getType());
 
         userService.updateUserCompleted(user);
 
         Transaction transaction = Transaction.builder()
                 .value(transactionDTO.value())
                 .description(transactionDTO.description())
-                .category(transactionDTO.category())
+                .category(category)
                 .createdAt(new Date())
                 .user(user)
                 .build();
@@ -68,18 +72,19 @@ public class TransactionService implements ITransactionService{
         Transaction transaction = repository.getReferenceById(id);
 
         User user = userService.getUserEntityById(transaction.getUser().getId());
+        TransactionCategory category = categoryService.getEntityById(transactionDTO.categoryId());
 
         // Revert the old transaction value
         user = balanceService.revertTransaction(user, transaction.getValue(), transaction.getCategory().getType());
 
         //Apply the new transaction value
-        user = balanceService.applyTransaction(user, transactionDTO.value(), transactionDTO.category().getType());
+        user = balanceService.applyTransaction(user, transactionDTO.value(), category.getType());
 
         userService.updateUserCompleted(user);
 
         transaction.setValue(transactionDTO.value());
         transaction.setDescription(transactionDTO.description());
-        transaction.setCategory(transactionDTO.category());
+        transaction.setCategory(category);
 
         Transaction transactionUpdated = repository.save(transaction);
         return SearchedTransactionDTO.from(transactionUpdated);

@@ -1,6 +1,8 @@
 package com.tech.padawan.financialmanager.transaction.service.exception;
 
-public class TransactionNotFound extends RuntimeException {
+import com.tech.padawan.financialmanager.global.exception.NotFoundException;
+
+public class TransactionNotFound extends NotFoundException {
     public TransactionNotFound(String message) {
         super(message);
     }

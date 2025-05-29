@@ -14,4 +14,5 @@ public interface ITransactionCategoryService {
     SearchedTransactionCategoryDTO update(Long id, UpdateTransactionCategoryDTO transactionDTO);
     String delete(Long id);
     Page<SearchedTransactionCategoryDTO> findAllByUser(long userid, int page, int size, String orderBy, String direction);
+    TransactionCategory getEntityById(Long id);
 }

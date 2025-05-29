@@ -10,7 +10,7 @@ public record SearchedTransactionDTO(
         Long id,
         String description,
         double value,
-        String type,
+        String category,
         Date createdAt,
         String user
 ) {

@@ -38,12 +38,8 @@ public class GoalController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> findById(@PathVariable Long id){
-        try{
-            return ResponseEntity.ok(service.getById(id));
-        } catch (GoalNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<SearchedGoalDTO> findById(@PathVariable Long id){
+        return ResponseEntity.ok(service.getById(id));
     }
 
     @PostMapping
@@ -54,22 +50,14 @@ public class GoalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody @Validated UpdateGoalDTO goalDTO){
-        try{
-            return ResponseEntity.ok(service.update(id, goalDTO));
-        } catch (UserNotFoundException | GoalNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<SearchedGoalDTO> update(@PathVariable Long id, @RequestBody @Validated UpdateGoalDTO goalDTO){
+        return ResponseEntity.ok(service.update(id, goalDTO));
     }
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id){
-        try{
-            return ResponseEntity.ok(service.delete(id));
-        } catch (GoalNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        return ResponseEntity.ok(service.delete(id));
     }
 
     @GetMapping("/user/{id}")
@@ -84,12 +72,8 @@ public class GoalController {
     }
 
     @PutMapping("/{id}/saveamount")
-    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody @Valid UpdateSaveAmountDTO dto){
-        try{
-            return ResponseEntity.ok(service.updateSaveAmount(id, dto.value()));
-        } catch (UserNotFoundException | GoalNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody @Valid UpdateSaveAmountDTO dto) {
+        return ResponseEntity.ok(service.updateSaveAmount(id, dto.value()));
     }
 
 }

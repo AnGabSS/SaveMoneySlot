@@ -37,14 +37,10 @@ public class UserController {
     
     @PostMapping
     public ResponseEntity<?> save(@RequestBody @Valid CreateUserDTO user){
-        try{
-            User userCreated = service.create(user);
-            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(userCreated.getId()).toUri();
-            UserSearchedDTO userDTO = UserSearchedDTO.from(userCreated);
-            return ResponseEntity.created(uri).body(userDTO);
-        } catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        User userCreated = service.create(user);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(userCreated.getId()).toUri();
+        UserSearchedDTO userDTO = UserSearchedDTO.from(userCreated);
+        return ResponseEntity.created(uri).body(userDTO);
     }
 
     @PostMapping("/login")
@@ -61,24 +57,14 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UpdateUserDTO user){
-        try{
-            User userCreated = service.update(id, user);
-            UserSearchedDTO userDTO = UserSearchedDTO.from(userCreated);
-            return ResponseEntity.ok(userDTO);
-        }catch (UserNotFoundException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (RuntimeException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        User userCreated = service.update(id, user);
+        UserSearchedDTO userDTO = UserSearchedDTO.from(userCreated);
+        return ResponseEntity.ok(userDTO);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id){
-        try{
-            return ResponseEntity.ok(service.delete(id));
-        } catch (UserNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        return ResponseEntity.ok(service.delete(id));
     }
 
 }

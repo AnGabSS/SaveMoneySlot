@@ -1,6 +1,8 @@
 package com.tech.padawan.financialmanager.user.service.exceptions;
 
-public class UserNotFoundException extends RuntimeException{
+import com.tech.padawan.financialmanager.global.exception.NotFoundException;
+
+public class UserNotFoundException extends NotFoundException {
     public UserNotFoundException(String message){
         super(message);
     }

@@ -29,11 +29,11 @@ public class Transaction {
     private Date createdAt;
 
     @ManyToOne
-    @NotEmpty(message = "Category is required")
+    @NotNull(message = "Category is required")
     private TransactionCategory category;
 
     @ManyToOne
-    @NotEmpty(message = "User is required")
+    @NotNull(message = "User is required")
     private User user;
 
 }
