@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -57,7 +58,7 @@ class UserServiceTest {
                 .password(encodedPassword)
                 .birthdate(userDTO.birthdate())
                 .roles(List.of(Role.builder().name(RoleType.ADMIN).build()))
-                .balance(0)
+                .balance(BigDecimal.ZERO)
                 .build();
 
         when(repository.save(any(User.class))).thenReturn(expectedUser);
