@@ -70,7 +70,7 @@ class UserServiceTest {
         assertEquals("David Bowie", createdUser.getName());
         assertEquals("david@bowie.com.us", createdUser.getEmail());
         assertEquals(encodedPassword, createdUser.getPassword());
-        assertEquals(0, createdUser.getBalance());
+        assertEquals(BigDecimal.ZERO, createdUser.getBalance());
         assertEquals(1, createdUser.getRoles().size());
         assertEquals(RoleType.ADMIN, createdUser.getRoles().get(0).getName());
 
