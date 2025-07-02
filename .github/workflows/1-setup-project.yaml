@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew test
 
       - name: Build and run with Docker Compose
-        run: docker-compose up -d --build
+        run: docker compose up -d --build
 
       - name: Wait for the app to start
         run: sleep 10
