@@ -39,4 +39,4 @@ jobs:
         run: sleep 10
 
       - name: Check if app is running
-        run: curl --fail http://localhost:8080 || (docker-compose logs && exit 1)
+        run: curl --fail http://localhost:8080 || (docker compose logs && exit 1)
