@@ -1,4 +1,4 @@
-name: Java CI with Gradle and Docker Compose
+name: Java CI for call the tests
 
 on: push
 
@@ -31,12 +31,3 @@ jobs:
 
       - name: Run unit tests
         run: ./gradlew test
-
-      - name: Build and run with Docker Compose
-        run: docker compose up -d --build
-
-      - name: Wait for the app to start
-        run: sleep 10
-
-      - name: Check if app is running
-        run: curl --fail http://localhost:8080 || (docker compose logs && exit 1)
