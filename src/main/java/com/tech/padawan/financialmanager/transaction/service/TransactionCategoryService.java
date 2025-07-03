@@ -2,15 +2,12 @@ package com.tech.padawan.financialmanager.transaction.service;
 
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionCategoryDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionCategoryDTO;
-import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionCategoryDTO;
-import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionCategoryRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionCategoryNotFound;
 import com.tech.padawan.financialmanager.user.model.User;
-import com.tech.padawan.financialmanager.user.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.tech.padawan.financialmanager.user.service.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,12 +16,20 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class TrasactionCategoryService implements ITransactionCategoryService{
-    @Autowired
-    private TransactionCategoryRepository repository;
-    @Autowired
-    private UserService userService;
+public class TransactionCategoryService implements ITransactionCategoryService{
+    private final TransactionCategoryRepository repository;
+    private final IUserService userService;
 
+
+    public TransactionCategoryService(
+            TransactionCategoryRepository repository,
+            IUserService userService
+
+    ) {
+        this.repository = repository;
+        this.userService = userService;
+
+    }
 
     @Override
     public Page<SearchedTransactionCategoryDTO> findAll(int page, int size, String orderBy, String direction) {

@@ -5,8 +5,13 @@ import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
+import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
+import com.tech.padawan.financialmanager.transaction.service.ITransactionBalanceService;
+import com.tech.padawan.financialmanager.transaction.service.ITransactionCategoryService;
 import com.tech.padawan.financialmanager.transaction.service.ITransactionService;
+import com.tech.padawan.financialmanager.transaction.service.TransactionService;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
+import com.tech.padawan.financialmanager.user.service.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,8 +26,11 @@ import java.util.List;
 @RequestMapping("/transaction")
 public class TransactionController {
 
-    @Autowired
-    private ITransactionService service;
+    private final ITransactionService service;
+
+    public TransactionController(ITransactionService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public ResponseEntity<List<SearchedTransactionDTO>> findAll(

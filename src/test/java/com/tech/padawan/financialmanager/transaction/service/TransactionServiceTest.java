@@ -4,12 +4,14 @@ import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
+import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
 import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategy;
 import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategyFactory;
 import com.tech.padawan.financialmanager.user.model.User;
+import com.tech.padawan.financialmanager.user.service.IUserService;
 import com.tech.padawan.financialmanager.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.data.domain.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,24 +31,38 @@ class TransactionServiceTest {
     private TransactionRepository repository;
 
     @Mock
-    private UserService userService;
+    private IUserService userService;
+
+    @Mock
+    private ITransactionBalanceService balanceService;
+
+    @Mock
+    private ITransactionCategoryService categoryService;
 
     @InjectMocks
     private TransactionService service;
 
     private User mockUser;
+    private TransactionCategory mockIncomeCategory;
+
     private Transaction mockTransaction;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
         mockUser = User.builder().id(1L).name("User Test").build();
+        mockIncomeCategory = TransactionCategory.builder()
+                .id(1L)
+                .name("Extra work")
+                .type(TransactionType.INCOME)
+                .user(mockUser)
+                .build();
 
         mockTransaction = Transaction.builder()
                 .id(1L)
-                .value(100.0)
+                .value(BigDecimal.valueOf(100.0))
                 .description("Salary")
-                .type(TransactionType.INCOME)
+                .category(mockIncomeCategory)
                 .createdAt(new Date())
                 .user(mockUser)
                 .build();
@@ -85,36 +102,41 @@ class TransactionServiceTest {
     @Test
     @DisplayName("Should create a transaction")
     void create() {
+        BigDecimal value = BigDecimal.valueOf(100.0);
+
         CreateTransactionDTO dto = new CreateTransactionDTO(
-                200.0, "Freelance", TransactionType.INCOME, 1L
+                value,
+                "Descrição",
+                mockUser.getId(),
+                mockIncomeCategory.getId()
         );
 
-        TransactionStrategy strategy = mock(TransactionStrategy.class);
-        when(userService.getUserEntityById(1L)).thenReturn(mockUser);
+        when(userService.getUserEntityById(mockUser.getId())).thenReturn(mockUser);
+        when(categoryService.getEntityById(mockIncomeCategory.getId())).thenReturn(mockIncomeCategory);
+        when(balanceService.applyTransaction(mockUser, value, TransactionType.INCOME)).thenReturn(mockUser);
         when(repository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(strategy.apply(any(User.class), eq(200.0))).thenReturn(mockUser);
 
-        try (MockedStatic<TransactionStrategyFactory> factory = mockStatic(TransactionStrategyFactory.class)) {
-            factory.when(() -> TransactionStrategyFactory.getStrategy(TransactionType.INCOME)).thenReturn(strategy);
+        Transaction result = service.create(dto);
 
-            Transaction created = service.create(dto);
-
-            assertEquals(dto.description(), created.getDescription());
-            verify(repository).save(any(Transaction.class));
-        }
+        assertEquals(value, result.getValue());
+        assertEquals("Descrição", result.getDescription());
+        assertEquals(mockUser, result.getUser());
+        assertEquals(mockIncomeCategory, result.getCategory());
     }
+
 
     @Test
     @DisplayName("Should update a transaction")
     void update() {
-        UpdateTransactionDTO dto = new UpdateTransactionDTO(150.0, "Updated", TransactionType.EXPENSE);
+        UpdateTransactionDTO dto = new UpdateTransactionDTO(BigDecimal.valueOf(150.0), "Updated", mockIncomeCategory.getId());
         TransactionStrategy oldStrategy = mock(TransactionStrategy.class);
         TransactionStrategy newStrategy = mock(TransactionStrategy.class);
 
         when(repository.getReferenceById(1L)).thenReturn(mockTransaction);
+        when(categoryService.getEntityById(mockIncomeCategory.getId())).thenReturn(mockIncomeCategory);
         when(userService.getUserEntityById(1L)).thenReturn(mockUser);
-        when(oldStrategy.revert(any(User.class), eq(100.0))).thenReturn(mockUser);
-        when(newStrategy.apply(any(User.class), eq(150.0))).thenReturn(mockUser);
+        when(oldStrategy.revert(any(User.class), eq(BigDecimal.valueOf(100.0)))).thenReturn(mockUser);
+        when(newStrategy.apply(any(User.class), eq(BigDecimal.valueOf(150.0)))).thenReturn(mockUser);
         when(repository.save(any(Transaction.class))).thenReturn(mockTransaction);
 
         try (MockedStatic<TransactionStrategyFactory> factory = mockStatic(TransactionStrategyFactory.class)) {

@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,7 +60,7 @@ public class UserService implements IUserService{
                 .password(passwordEncoder.encode(userDTO.password()))
                 .birthdate(userDTO.birthdate())
                 .roles(List.of(Role.builder().name(userDTO.role()).build()))
-                .balance(0)
+                .balance(BigDecimal.ZERO)
                 .build();
         return repository.save(user);
     }
@@ -90,6 +91,22 @@ public class UserService implements IUserService{
     public User getUserEntityById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found."));
+    }
+
+    @Override
+    public User addValueToBalance(Long id, BigDecimal value) {
+        User oldUser = repository.getReferenceById(id);
+        BigDecimal newValue = oldUser.getBalance().add(value);
+        oldUser.setBalance(newValue);
+        return repository.save(oldUser);
+    }
+
+    @Override
+    public User subtractValueToBalance(Long id, BigDecimal value) {
+        User oldUser = repository.getReferenceById(id);
+        BigDecimal newValue = oldUser.getBalance().subtract(value);
+        oldUser.setBalance(newValue);
+        return repository.save(oldUser);
     }
 
 }

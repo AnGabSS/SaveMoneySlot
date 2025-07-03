@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -23,7 +24,7 @@ public class Transaction {
     private Long id;
     @NotNull(message = "Value is required")
     @Min(value = 0, message = "Value be a negative number")
-    private double value;
+    private BigDecimal value;
     @NotBlank(message = "Description is required")
     private String description;
     private Date createdAt;

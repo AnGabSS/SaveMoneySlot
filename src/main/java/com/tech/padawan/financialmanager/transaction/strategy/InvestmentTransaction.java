@@ -2,17 +2,19 @@ package com.tech.padawan.financialmanager.transaction.strategy;
 
 import com.tech.padawan.financialmanager.user.model.User;
 
+import java.math.BigDecimal;
+
 public class InvestmentTransaction implements TransactionStrategy{
     @Override
-    public User apply(User user, double value) {
-        user.setBalance(user.getBalance() + value);
+    public User apply(User user, BigDecimal value) {
+        user.setBalance(user.getBalance().add(value));
         return user;
 
     }
 
     @Override
-    public User revert(User user, double value) {
-        user.setBalance(user.getBalance() - value);
+    public User revert(User user, BigDecimal value) {
+        user.setBalance(user.getBalance().subtract(value));
         return user;
     }
 }

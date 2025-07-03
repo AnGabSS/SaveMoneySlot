@@ -4,12 +4,13 @@ import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public record SearchedTransactionDTO(
         Long id,
         String description,
-        double value,
+        BigDecimal value,
         String category,
         Date createdAt,
         String user

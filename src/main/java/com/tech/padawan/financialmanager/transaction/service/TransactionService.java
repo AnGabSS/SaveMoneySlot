@@ -7,12 +7,9 @@ import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
-import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategy;
-import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategyFactory;
 import com.tech.padawan.financialmanager.user.model.User;
-import com.tech.padawan.financialmanager.user.service.UserService;
+import com.tech.padawan.financialmanager.user.service.IUserService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,14 +20,24 @@ import java.util.Optional;
 
 @Service
 public class TransactionService implements ITransactionService{
-    @Autowired
-    private TransactionRepository repository;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private TransactionBalanceService balanceService;
-    @Autowired
-    private ITransactionCategoryService categoryService;
+
+    private final TransactionRepository repository;
+    private final IUserService userService;
+    private final ITransactionBalanceService balanceService;
+    private final ITransactionCategoryService categoryService;
+
+    public TransactionService(
+            TransactionRepository repository,
+            IUserService userService,
+            ITransactionBalanceService balanceService,
+            ITransactionCategoryService categoryService
+    ) {
+        this.repository = repository;
+        this.userService = userService;
+        this.balanceService = balanceService;
+        this.categoryService = categoryService;
+    }
+
 
     @Override
     public Page<SearchedTransactionDTO> findAll(int page, int size, String orderBy, String direction) {

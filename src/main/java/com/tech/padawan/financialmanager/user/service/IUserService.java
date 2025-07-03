@@ -3,6 +3,7 @@ package com.tech.padawan.financialmanager.user.service;
 import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,5 +16,7 @@ public interface IUserService {
     String delete(Long id);
     User updateUserCompleted(User user);
     User getUserEntityById(Long id);
+    User addValueToBalance(Long id, BigDecimal value);
+    User subtractValueToBalance(Long id, BigDecimal value);
 
 }
