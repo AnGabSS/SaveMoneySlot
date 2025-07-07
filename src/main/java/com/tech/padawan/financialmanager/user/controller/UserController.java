@@ -24,8 +24,11 @@ import java.net.URI;
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
-    private IUserService service;
+    private final IUserService service;
+
+    public UserController(IUserService service){
+        this.service = service;
+    }
 
     @Operation(summary = "Get a user by ID", responses = {
             @ApiResponse(responseCode = "200", description = "User found", content = @Content(schema = @Schema(implementation = UserSearchedDTO.class))),
@@ -36,7 +39,7 @@ public class UserController {
     }
     
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody @Valid CreateUserDTO user){
+    public ResponseEntity<UserSearchedDTO> save(@RequestBody @Valid CreateUserDTO user){
         User userCreated = service.create(user);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(userCreated.getId()).toUri();
         UserSearchedDTO userDTO = UserSearchedDTO.from(userCreated);
@@ -51,12 +54,12 @@ public class UserController {
         } catch (BadCredentialsException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password is incorrect");
         } catch (InternalAuthenticationServiceException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found");
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UpdateUserDTO user){
+    public ResponseEntity<UserSearchedDTO> update(@PathVariable Long id, @RequestBody UpdateUserDTO user){
         User userCreated = service.update(id, user);
         UserSearchedDTO userDTO = UserSearchedDTO.from(userCreated);
         return ResponseEntity.ok(userDTO);
