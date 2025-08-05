@@ -12,6 +12,7 @@ import com.tech.padawan.financialmanager.transaction.service.ITransactionService
 import com.tech.padawan.financialmanager.transaction.service.TransactionService;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
 import com.tech.padawan.financialmanager.user.service.IUserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/transaction")
+@Tag(
+        name = "Transactions",
+        description = "Transactions carried out by the user, such as buying a game or receiving their salary."
+)
 public class TransactionController {
 
     private final ITransactionService service;

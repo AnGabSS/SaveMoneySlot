@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,9 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/users")
+@Tag(
+        name = "Users"
+)
 public class UserController {
 
     private final IUserService service;
@@ -33,11 +37,15 @@ public class UserController {
     @Operation(summary = "Get a user by ID", responses = {
             @ApiResponse(responseCode = "200", description = "User found", content = @Content(schema = @Schema(implementation = UserSearchedDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found")
-    })    @GetMapping("/{id}")
+    })
+    @GetMapping("/{id}")
     public ResponseEntity<UserSearchedDTO> findById(@PathVariable Long id){
         return ResponseEntity.ok().body(service.getById(id));
     }
-    
+
+    @Operation(summary = "Register a new user",  responses = {
+            @ApiResponse(responseCode = "201", description = "User registered",  content = @Content(schema = @Schema(implementation = UserSearchedDTO.class)))
+    })
     @PostMapping
     public ResponseEntity<UserSearchedDTO> save(@RequestBody @Valid CreateUserDTO user){
         User userCreated = service.create(user);
@@ -46,18 +54,24 @@ public class UserController {
         return ResponseEntity.created(uri).body(userDTO);
     }
 
+    @Operation(summary = "Login", responses = {
+            @ApiResponse(responseCode = "200", description = "User authenticated", content = @Content(schema = @Schema(implementation = RecoveryJwtTokenDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Email or password is incorrect")
+    })
     @PostMapping("/login")
     public ResponseEntity<Object> authenticateUser(@RequestBody LoginUserDTO user){
         try{
             RecoveryJwtTokenDTO token = service.authenticateUser(user);
             return ResponseEntity.ok(token);
-        } catch (BadCredentialsException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password is incorrect");
-        } catch (InternalAuthenticationServiceException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found");
+        } catch (BadCredentialsException | InternalAuthenticationServiceException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email or password is incorrect");
         }
     }
 
+    @Operation(summary = "Update a user", responses = {
+            @ApiResponse(responseCode = "200", description = "User updated", content = @Content(schema = @Schema(implementation = UserSearchedDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<UserSearchedDTO> update(@PathVariable Long id, @RequestBody UpdateUserDTO user){
         User userCreated = service.update(id, user);
@@ -65,6 +79,10 @@ public class UserController {
         return ResponseEntity.ok(userDTO);
     }
 
+    @Operation(summary = "Delete a user", responses = {
+            @ApiResponse(responseCode = "200", description = "User deleted", content = @Content(schema = @Schema(description = "User deleted"))),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id){
         return ResponseEntity.ok(service.delete(id));

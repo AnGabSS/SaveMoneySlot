@@ -8,6 +8,7 @@ import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.service.ITransactionCategoryService;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionCategoryNotFound;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/transaction/category")
+@Tag(
+        name = "Transaction Categories",
+        description = "Responsible for defining the different types of transactions, such as an expense with a car or money received from a freelance job."
+)
 public class TransactionCategoryController {
 
     @Autowired

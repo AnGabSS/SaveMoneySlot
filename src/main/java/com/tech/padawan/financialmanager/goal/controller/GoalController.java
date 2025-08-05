@@ -8,6 +8,7 @@ import com.tech.padawan.financialmanager.goal.model.Goal;
 import com.tech.padawan.financialmanager.goal.service.IGoalService;
 import com.tech.padawan.financialmanager.goal.service.exception.GoalNotFoundException;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/goals")
+@Tag(
+        name = "Goals",
+        description = "Goals that the user has, and how much they need to save to achieve each goal."
+)
 public class GoalController {
 
     @Autowired
