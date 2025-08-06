@@ -85,6 +85,7 @@ test {
 	}
 }
 
+
 jacocoTestCoverageVerification{
 	violationRules{
 		rule{

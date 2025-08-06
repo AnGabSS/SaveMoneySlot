@@ -7,6 +7,9 @@ import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,8 +30,10 @@ public class UserService implements IUserService{
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public List<User> listAll() {
-        return repository.findAll();
+    public Page<UserSearchedDTO> listAll(Integer page, Integer size, String orderBy, String direction) {
+        PageRequest pageRequest = PageRequest.of(page - 1 , size, Sort.Direction.valueOf(direction), orderBy);
+        Page<User> foundUsers = repository.findAll(pageRequest);
+        return foundUsers.map(UserSearchedDTO::from);
     }
 
     @Override

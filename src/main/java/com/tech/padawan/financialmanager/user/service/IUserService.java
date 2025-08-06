@@ -2,13 +2,14 @@ package com.tech.padawan.financialmanager.user.service;
 
 import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 public interface IUserService {
-    List<User> listAll();
+    Page<UserSearchedDTO> listAll(Integer page, Integer size, String orderBy, String direction);
     UserSearchedDTO getById(Long id);
     RecoveryJwtTokenDTO authenticateUser(LoginUserDTO userDTO);
     User create(CreateUserDTO user);

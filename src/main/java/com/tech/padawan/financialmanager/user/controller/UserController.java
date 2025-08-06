@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -32,6 +33,18 @@ public class UserController {
 
     public UserController(IUserService service){
         this.service = service;
+    }
+
+    @Operation(summary = "Get User page ", responses = {
+            @ApiResponse(responseCode = "200", description = "Page founded", content = @Content(schema = @Schema(implementation = Page.class)))
+    })
+    @GetMapping()
+    public ResponseEntity<Page<UserSearchedDTO>> findAll(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "4") int size,
+            @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
+            @RequestParam(value = "direction", defaultValue = "ASC") String direction){
+        return ResponseEntity.ok().body(service.listAll(page, size, orderBy, direction));
     }
 
     @Operation(summary = "Get a user by ID", responses = {
