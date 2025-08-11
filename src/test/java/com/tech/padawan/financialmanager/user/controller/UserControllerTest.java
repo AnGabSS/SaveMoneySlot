@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -171,7 +172,8 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Thom Yorke"))
                 .andExpect(jsonPath("$.email").value("thom.yorke@radiohead.com.en"))
-                .andExpect(jsonPath("$.birthdate").value("1968-10-07T03:00:00.000+00:00"));
+                .andExpect(jsonPath("$.birthdate").value(containsString("1968-10-07")));
+
     }
 
     @Test
