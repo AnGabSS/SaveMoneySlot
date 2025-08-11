@@ -6,6 +6,22 @@ jobs:
   build-run:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        # Espera até que o Postgres esteja pronto
+        options: >-
+          --health-cmd="pg_isready -U testuser -d testdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,6 +44,24 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle
+
+      - name: Start services via Docker Compose
+        run: |
+          cp .env-test .env
+          docker compose up -d
+          docker compose ps
+
+      - name: Wait for database to be ready
+        run: |
+          echo "Waiting for database..."
+          until docker exec $(docker ps -qf "name=postgres") \
+            pg_isready -U $POSTGRES_USER -d $POSTGRES_DB; do
+            sleep 2
+          done
+        env:
+          POSTGRES_USER: test
+          POSTGRES_DB: test
+
 
       - name: Run unit tests
         run: ./gradlew test
