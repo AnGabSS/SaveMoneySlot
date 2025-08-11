@@ -24,7 +24,7 @@ jobs:
           echo "Waiting for database..."
           # obtém o container do postgres (ajuste "postgres" se seu serviço tiver outro nome)
           POSTGRES_CONTAINER=$(docker ps -qf "name=postgres")
-          until docker exec "$POSTGRES_CONTAINER" pg_isready -U $POSTGRES_USER -d $POSTGRES_DB; do
+          until docker exec db pg_isready -U $POSTGRES_USER -d $POSTGRES_DB; do
             echo "Waiting for Postgres..."
             sleep 2
           done
