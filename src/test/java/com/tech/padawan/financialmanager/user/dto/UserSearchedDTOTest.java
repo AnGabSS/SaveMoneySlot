@@ -22,8 +22,7 @@ class UserSearchedDTOTest {
     @Test
     @DisplayName("Should return the currect fields")
     void from() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date birthdate = sdf.parse("2004-09-12");
+        LocalDate birthdate = LocalDate.parse("2004-09-12");
 
         Role role = Role.builder()
                 .id(1L)

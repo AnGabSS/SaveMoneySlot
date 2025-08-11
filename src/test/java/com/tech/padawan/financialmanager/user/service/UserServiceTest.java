@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,7 +46,7 @@ class UserServiceTest {
                 "David Bowie",
                 "david@bowie.com.us",
                 "david123456",
-                new SimpleDateFormat("yyyy-MM-dd").parse("1940-04-03"),
+                LocalDate.parse("1940-04-03"),
                 RoleType.ADMIN
         );
 

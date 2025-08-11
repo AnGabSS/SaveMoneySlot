@@ -4,6 +4,7 @@ import com.tech.padawan.financialmanager.role.model.RoleType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public record UpdateUserDTO (
@@ -12,6 +13,6 @@ public record UpdateUserDTO (
         @NotBlank(message = "Email is required")
         String email,
         @NotNull(message = "Birthdate is required")
-        Date birthdate
+        LocalDate birthdate
 ){
 }
