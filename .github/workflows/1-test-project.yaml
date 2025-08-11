@@ -1,4 +1,4 @@
-name: Java CI for call the tests
+name: Java CI with Docker Compose Postgres
 
 on: push
 
@@ -6,30 +6,34 @@ jobs:
   build-run:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready -U test
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Copy .env-test to .env
+        run: cp .env-test .env
+
+      - name: Start services via Docker Compose
+        run: docker compose up -d
+
+      - name: Wait for Postgres to be ready
+        env:
+          POSTGRES_USER: test
+          POSTGRES_DB: test
+        run: |
+          echo "Waiting for database..."
+          # obtém o container do postgres (ajuste "postgres" se seu serviço tiver outro nome)
+          POSTGRES_CONTAINER=$(docker ps -qf "name=postgres")
+          until docker exec "$POSTGRES_CONTAINER" pg_isready -U $POSTGRES_USER -d $POSTGRES_DB; do
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x gradlew
@@ -44,16 +48,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
-      - name: Wait for Postgres to be ready
-        run: |
-          echo "Waiting for database..."
-          until pg_isready -h localhost -p 5432 -U test; do
-            sleep 2
-          done
-
       - name: Run unit tests
-        run: ./gradlew test
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test123
           POSTGRES_DB: test
+        run: ./gradlew test
