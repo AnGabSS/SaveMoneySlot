@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface IUserService {
     Page<UserSearchedDTO> listAll(Integer page, Integer size, String orderBy, String direction);
     UserSearchedDTO getById(Long id);
+    User getByEmail(String email);
     RecoveryJwtTokenDTO authenticateUser(LoginUserDTO userDTO);
     User create(CreateUserDTO user);
     User update(Long id, UpdateUserDTO user);

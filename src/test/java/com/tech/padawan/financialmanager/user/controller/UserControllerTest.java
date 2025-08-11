@@ -5,8 +5,7 @@ import com.tech.padawan.financialmanager.global.config.security.JwtTokenService;
 import com.tech.padawan.financialmanager.global.config.security.TestSecurityConfig;
 import com.tech.padawan.financialmanager.role.model.Role;
 import com.tech.padawan.financialmanager.role.model.RoleType;
-import com.tech.padawan.financialmanager.user.dto.CreateUserDTO;
-import com.tech.padawan.financialmanager.user.dto.UserSearchedDTO;
+import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.service.IUserService;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
@@ -22,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,8 +33,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
@@ -51,15 +50,14 @@ class UserControllerTest {
     @MockitoBean
     private JwtTokenService jwtTokenService;
 
-    @MockitoBean
-    private UserController controller;
-
     @Autowired
     private ObjectMapper objectMapper;
 
 
     private static UserSearchedDTO mockUserSearchedDTO;
     private static CreateUserDTO mockCreateUserDTO;
+    private static UpdateUserDTO mockUpdateUserDTO;
+    private static User mockUser;
 
     @BeforeAll
     static void setup() throws Exception {
@@ -78,6 +76,19 @@ class UserControllerTest {
                 new SimpleDateFormat("yyyy-MM-dd").parse("1940-04-03"),
                 RoleType.ADMIN
         );
+        mockUpdateUserDTO = new UpdateUserDTO(
+                "Thom Yorke",
+                "thom.yorke@radiohead.com.en",
+                new SimpleDateFormat("yyyy-MM-dd").parse("1968-10-07")
+        );
+        mockUser = User.builder()
+                .id(1L)
+                .name("David Bowie")
+                .email("david@bowie.com.us")
+                .birthdate(new SimpleDateFormat("yyyy-MM-dd").parse("1940-04-03"))
+                .roles(List.of(Role.builder().name(RoleType.ADMIN).build()))
+                .balance(BigDecimal.ZERO)
+                .build();
     }
 
     @Test
@@ -127,15 +138,6 @@ class UserControllerTest {
     @Test
     @DisplayName("Should create a user and return http code 201")
     void shouldCreateAUserAndReturnHttpCode201() throws Exception {
-        // Mock do User retornado pelo service
-        User mockUser = User.builder()
-                .id(1L)
-                .name("David Bowie")
-                .email("david@bowie.com.us")
-                .birthdate(new SimpleDateFormat("yyyy-MM-dd").parse("1940-04-03"))
-                .roles(List.of(Role.builder().name(RoleType.ADMIN).build()))
-                .balance(BigDecimal.ZERO)
-                .build();
 
         when(service.create(any(CreateUserDTO.class))).thenReturn(mockUser);
 
@@ -147,6 +149,80 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email").value("david@bowie.com.us"))
                 .andExpect(jsonPath("$.balance").value(0));
     }
+
+    @Test
+    @DisplayName("Should update a user and return http code 200")
+    void shouldUpdateAUserAndReturnHttpCode200() throws Exception {
+        User mockUserUpdated = User.builder()
+                .id(1L)
+                .name("Thom Yorke")
+                .email("thom.yorke@radiohead.com.en")
+                .birthdate(new SimpleDateFormat("yyyy-MM-dd").parse("1968-10-07"))
+                .roles(List.of(Role.builder().name(RoleType.ADMIN).build()))
+                .balance(BigDecimal.ZERO)
+                .build();
+
+        when(service.update(1L, mockUpdateUserDTO)).thenReturn(mockUserUpdated);
+        when(service.getById(1L)).thenReturn(mockUserSearchedDTO);
+
+        mockMvc.perform(put("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(mockUpdateUserDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Thom Yorke"))
+                .andExpect(jsonPath("$.email").value("thom.yorke@radiohead.com.en"))
+                .andExpect(jsonPath("$.birthdate").value("1968-10-07T03:00:00.000+00:00"));
+    }
+
+    @Test
+    @DisplayName("Should delete a user and return http code 200")
+    void shouldDeleteAUserAndReturnHttpCode200() throws Exception {
+        when(service.delete(1L)).thenReturn("User deleted");
+
+        mockMvc.perform(delete("/users/1")
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().string("User deleted"));
+    }
+
+    @Test
+    @DisplayName("Should authenticate user and return 200 with JWT token")
+    void shouldAuthenticateUserAndReturn200WithJwtToken() throws Exception {
+        // Arrange
+        LoginUserDTO loginRequest = new LoginUserDTO("david@bowie.com.us", "password123");
+        RecoveryJwtTokenDTO tokenDTO = new RecoveryJwtTokenDTO("mock-jwt-token");
+
+        when(service.getByEmail(loginRequest.email())).thenReturn(mockUser);
+
+        when(service.authenticateUser(any(LoginUserDTO.class)))
+                .thenReturn(tokenDTO);
+
+        // Act & Assert
+        mockMvc.perform(post("/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("mock-jwt-token"));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when email or password is incorrect")
+    void shouldReturn400WhenEmailOrPasswordIsIncorrect() throws Exception {
+        // Arrange
+        LoginUserDTO loginRequest = new LoginUserDTO("wrong@email.com", "wrongpass");
+
+        when(service.authenticateUser(any(LoginUserDTO.class)))
+                .thenThrow(new BadCredentialsException("Invalid credentials"));
+
+        // Act & Assert
+        mockMvc.perform(post("/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Email or password is incorrect"));
+    }
+
+
 
 
 }

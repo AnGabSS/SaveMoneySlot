@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   app:
@@ -7,3 +6,24 @@ services:
     ports:
       - "8080:8080"
     command: ["java", "-jar", "app.jar"]
+    environment:
+      DATABASE_HOST: db
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_DB: ${DATABASE_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_ISSUER: ${JWT_ISSUER}
+
+  db:
+    image: bitnami/postgresql:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_NAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_DB}
+    volumes:
+      - postgres_data:/bitnami/postgresql
+
+volumes:
+  postgres_data:

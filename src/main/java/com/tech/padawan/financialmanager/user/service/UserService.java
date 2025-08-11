@@ -43,6 +43,11 @@ public class UserService implements IUserService{
     }
 
     @Override
+    public User getByEmail(String email) {
+        return Optional.of(repository.findByEmail(email)).get().orElseThrow(() -> new UserNotFoundException("User with email " + email + " not found."));
+    }
+
+    @Override
     public RecoveryJwtTokenDTO authenticateUser(LoginUserDTO loginUserDto) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                 new UsernamePasswordAuthenticationToken(loginUserDto.email(), loginUserDto.password());
@@ -51,8 +56,7 @@ public class UserService implements IUserService{
 
         String email = authentication.getName();
 
-        User user = repository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        User user = this.getByEmail(email);
 
         return new RecoveryJwtTokenDTO(jwtTokenService.generateToken(user));
     }
