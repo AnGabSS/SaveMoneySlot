@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +67,7 @@ class UserControllerTest {
                 1L,
                 "David Bowie",
                 "david@bowie.com.us",
-                new SimpleDateFormat("yyyy-MM-dd").parse("1940-04-03"),
+                LocalDate.parse("1940-04-03"),
                 BigDecimal.ZERO,
                 RoleType.ADMIN
         );
@@ -74,19 +75,19 @@ class UserControllerTest {
                 "David Bowie",
                 "david@bowie.com.us",
                 "password123",
-                new SimpleDateFormat("yyyy-MM-dd").parse("1940-04-03"),
+                LocalDate.parse("1940-04-03"),
                 RoleType.ADMIN
         );
         mockUpdateUserDTO = new UpdateUserDTO(
                 "Thom Yorke",
                 "thom.yorke@radiohead.com.en",
-                new SimpleDateFormat("yyyy-MM-dd").parse("1968-10-07")
+                LocalDate.parse("1968-10-07")
         );
         mockUser = User.builder()
                 .id(1L)
                 .name("David Bowie")
                 .email("david@bowie.com.us")
-                .birthdate(new SimpleDateFormat("yyyy-MM-dd").parse("1940-04-03"))
+                .birthdate(LocalDate.parse("1940-04-03"))
                 .roles(List.of(Role.builder().name(RoleType.ADMIN).build()))
                 .balance(BigDecimal.ZERO)
                 .build();
@@ -158,7 +159,7 @@ class UserControllerTest {
                 .id(1L)
                 .name("Thom Yorke")
                 .email("thom.yorke@radiohead.com.en")
-                .birthdate(new SimpleDateFormat("yyyy-MM-dd").parse("1968-10-07"))
+                .birthdate(LocalDate.parse("1968-10-07"))
                 .roles(List.of(Role.builder().name(RoleType.ADMIN).build()))
                 .balance(BigDecimal.ZERO)
                 .build();
@@ -172,7 +173,7 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Thom Yorke"))
                 .andExpect(jsonPath("$.email").value("thom.yorke@radiohead.com.en"))
-                .andExpect(jsonPath("$.birthdate").value(containsString("1968-10-07")));
+                .andExpect(jsonPath("$.birthdate").value("1968-10-07"));
 
     }
 

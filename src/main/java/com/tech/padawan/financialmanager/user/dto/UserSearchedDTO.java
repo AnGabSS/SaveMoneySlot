@@ -4,13 +4,14 @@ import com.tech.padawan.financialmanager.role.model.RoleType;
 import com.tech.padawan.financialmanager.user.model.User;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 public record UserSearchedDTO(
         Long id,
         String name,
         String email,
-        Date birthdate,
+        LocalDate birthdate,
         BigDecimal balance,
         RoleType role
 ) {
