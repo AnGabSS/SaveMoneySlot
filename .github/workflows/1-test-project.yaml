@@ -13,8 +13,14 @@ jobs:
       - name: Copy .env-test to .env
         run: cp .env-test .env
 
+      - name: Stop and remove all containers and volumes
+        run: |
+          docker compose down -v --remove-orphans
+          docker system prune -f --volumes
+      
+
       - name: Start services via Docker Compose
-        run: docker compose --env-file .env-test up -d
+        run: docker compose --env-file .env-test up -d --build
 
       - name: Wait for Postgres to be ready
         env:
