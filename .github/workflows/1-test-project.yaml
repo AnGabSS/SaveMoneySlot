@@ -48,9 +48,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
-      - name: Run unit tests
+      - name: Run tests
         env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test123
-          POSTGRES_DB: test
+          SECRET_KEY: testing
+          DATABASE_NAME: test
+          DATABASE_PASSWORD: test123
+          DATABASE_DB: test
+          JWT_ISSUER: test
         run: ./gradlew test
