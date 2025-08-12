@@ -35,6 +35,9 @@ jobs:
             sleep 2
           done
 
+      - name: Print environment variables from Postgres container
+        run: docker exec db env
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -59,6 +62,6 @@ jobs:
           SECRET_KEY: testing
           DATABASE_NAME: test
           DATABASE_PASSWORD: test123
-          DATABASE_DB: test
+          DATABASE_DB: SaveMoneySlot_TEST
           JWT_ISSUER: test
         run: ./gradlew test
