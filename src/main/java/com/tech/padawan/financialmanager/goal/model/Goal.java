@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -28,9 +29,9 @@ public class Goal {
     private String name;
     @NotNull(message = "Target Amount is required")
     @Min(value = 0, message = "Target cannot be a negative number")
-    private double targetAmount;
+    private BigDecimal targetAmount;
     @NotNull(message = "Saved Amount is required")
-    private double savedAmount;
+    private BigDecimal savedAmount;
     @Nullable
     private String reason;
     @Nullable
@@ -51,7 +52,7 @@ public class Goal {
     @PreUpdate
     protected void onUpdate(){
         this.updatedAt = new Date();
-        this.isCompleted = this.savedAmount >= this.targetAmount;
+        this.isCompleted = this.savedAmount.compareTo(this.targetAmount) >= 0;
     }
 
 

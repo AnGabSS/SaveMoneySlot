@@ -7,6 +7,8 @@ import com.tech.padawan.financialmanager.goal.model.Goal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
+
 
 public interface IGoalService {
     Page<SearchedGoalDTO> findAll(int page, int size, String orderBy, String direction);
@@ -15,5 +17,5 @@ public interface IGoalService {
     SearchedGoalDTO update(Long id, UpdateGoalDTO goal);
     Page<SearchedGoalDTO> findAllByUserId(Long userId, int page, int size, String orderBy, String direction);
     String delete(Long id);
-    SearchedGoalDTO updateSaveAmount(Long id, double newSaveAmount);
+    SearchedGoalDTO updateSaveAmount(Long id, BigDecimal newSaveAmount);
 }
