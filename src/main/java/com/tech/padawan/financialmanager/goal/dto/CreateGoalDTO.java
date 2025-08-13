@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public record CreateGoalDTO(
@@ -12,9 +13,9 @@ public record CreateGoalDTO(
         String name,
         @NotNull(message = "Target Amount is required")
         @Min(value = 0, message = "Target cannot be a negative number")
-        double targetAmount,
+        BigDecimal targetAmount,
         @NotNull(message = "Saved Amount is required")
-        double savedAmount,
+        BigDecimal savedAmount,
         @Nullable
         String reason,
         @Nullable

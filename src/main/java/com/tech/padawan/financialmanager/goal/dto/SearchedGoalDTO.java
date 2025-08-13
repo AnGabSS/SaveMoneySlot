@@ -3,13 +3,14 @@ package com.tech.padawan.financialmanager.goal.dto;
 import com.tech.padawan.financialmanager.goal.model.Goal;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public record SearchedGoalDTO(
         Long id,
         String name,
-        double targetAmount,
-        double savedAmount,
+        BigDecimal targetAmount,
+        BigDecimal savedAmount,
         String reason,
         Date deadline,
         boolean isCompleted,

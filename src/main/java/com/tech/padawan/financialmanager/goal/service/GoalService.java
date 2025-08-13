@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -56,7 +57,7 @@ public class GoalService implements IGoalService {
 
     @Override
     public SearchedGoalDTO update(Long id, UpdateGoalDTO goal) {
-        Goal oldGoal = Optional.of(repository.findById(id).orElseThrow(() -> new GoalNotFoundException("Goal with id " + id + " not found."))).get();;
+        Goal oldGoal = Optional.of(repository.findById(id).orElseThrow(() -> new GoalNotFoundException("Goal with id " + id + " not found."))).get();
         oldGoal.setName(goal.name());
         oldGoal.setTargetAmount(goal.targetAmount());
         oldGoal.setSavedAmount(goal.savedAmount());
@@ -81,7 +82,7 @@ public class GoalService implements IGoalService {
     }
 
     @Override
-    public SearchedGoalDTO updateSaveAmount(Long id, double newSaveAmount) {
+    public SearchedGoalDTO updateSaveAmount(Long id, BigDecimal newSaveAmount) {
         Goal oldGoal = Optional.of(repository.findById(id).orElseThrow(() -> new GoalNotFoundException("Goal with id " + id + " not found."))).get();;
         oldGoal.setSavedAmount(newSaveAmount);
         Goal newGoal = repository.save(oldGoal);
