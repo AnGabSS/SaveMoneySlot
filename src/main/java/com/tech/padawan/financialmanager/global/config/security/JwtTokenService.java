@@ -10,11 +10,15 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import io.github.cdimascio.dotenv.Dotenv;
+
 
 @Service
 public class JwtTokenService {
-    private static final String SECRET = System.getenv("SECRET_KEY");
-    private static final String ISSUER = System.getenv("JWT_ISSUER");
+    private static final Dotenv dotenv = Dotenv.load();
+
+    private static final String SECRET = dotenv.get("SECRET_KEY");
+    private static final String ISSUER = dotenv.get("JWT_ISSUER");
 
     public String generateToken(User user){
         try{

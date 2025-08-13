@@ -1,4 +1,4 @@
-name: Java CI for call the tests
+name: Java CI with Docker Compose Postgres
 
 on: push
 
@@ -10,11 +10,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Copy .env-test to .env
+        run: cp .env-test .env
+
+      - name: Stop and remove all containers and volumes
+        run: |
+          docker compose down -v --remove-orphans
+          docker system prune -f --volumes
+      
+
+      - name: Start services via Docker Compose
+        run: docker compose --env-file .env-test up -d --build
+
+      - name: Wait for Postgres to be ready
+        env:
+          POSTGRES_USER: test
+          POSTGRES_DB: test
+        run: |
+          echo "Waiting for database..."
+          # obtém o container do postgres (ajuste "postgres" se seu serviço tiver outro nome)
+          POSTGRES_CONTAINER=$(docker ps -qf "name=postgres")
+          until docker exec db pg_isready -U $POSTGRES_USER -d $POSTGRES_DB; do
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+
+      - name: Print environment variables from Postgres container
+        run: docker exec db env
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x gradlew
@@ -29,5 +57,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
-      - name: Run unit tests
+      - name: Run tests
+        env:
+          SECRET_KEY: testing
+          DATABASE_NAME: test
+          DATABASE_PASSWORD: test123
+          DATABASE_DB: SaveMoneySlot_TEST
+          JWT_ISSUER: test
         run: ./gradlew test

@@ -16,6 +16,7 @@ services:
 
   db:
     image: bitnami/postgresql:latest
+    container_name: db
     ports:
       - "5432:5432"
     environment:
