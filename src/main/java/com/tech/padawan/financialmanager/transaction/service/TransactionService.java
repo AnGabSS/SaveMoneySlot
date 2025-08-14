@@ -41,7 +41,7 @@ public class TransactionService implements ITransactionService{
 
     @Override
     public Page<SearchedTransactionDTO> findAll(int page, int size, String orderBy, String direction) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+        PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
         Page<Transaction> list = repository.findAll(pageRequest);
         return list.map(SearchedTransactionDTO::from);
     }
@@ -106,7 +106,7 @@ public class TransactionService implements ITransactionService{
 
     @Override
     public Page<SearchedTransactionDTO> findAllByUser(long userid, int page, int size, String orderBy, String direction) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+        PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
         Page<Transaction> list = repository.findAllByUserId(pageRequest, userid);
         return list.map(SearchedTransactionDTO::from);
     }
