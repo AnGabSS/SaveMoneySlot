@@ -93,3 +93,18 @@ jacocoTestCoverageVerification{
 		}
 	}
 }
+
+tasks.test {
+	def envFile = file(".env-test")
+	if (envFile.exists()) {
+		envFile.eachLine { line ->
+			line = line.trim()
+			if (line && !line.startsWith("#")) {
+				def (key, value) = line.split("=", 2)
+				// Remove aspas se houver
+				value = value?.replaceAll(/^['"]|['"]$/, "")
+				environment key, value
+			}
+		}
+	}
+}

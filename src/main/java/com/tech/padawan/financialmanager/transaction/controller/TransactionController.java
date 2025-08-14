@@ -15,6 +15,7 @@ import com.tech.padawan.financialmanager.user.service.IUserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,13 +39,13 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SearchedTransactionDTO>> findAll(
-            @RequestParam(value = "page", defaultValue = "0") int page,
+    public ResponseEntity<Page<SearchedTransactionDTO>> findAll(
+            @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "4") int size,
             @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ){
-        return ResponseEntity.ok(service.findAll(page, size, orderBy, direction).getContent());
+        return ResponseEntity.ok(service.findAll(page, size, orderBy, direction));
     }
 
     @GetMapping("/{id}")
@@ -71,14 +72,14 @@ public class TransactionController {
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<SearchedTransactionDTO>> findAllByUser(
+    public ResponseEntity<Page<SearchedTransactionDTO>> findAllByUser(
             @PathVariable Long id,
-            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "4") int size,
             @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ){
-        return ResponseEntity.ok(service.findAllByUser(id, page, size, orderBy, direction).getContent());
+        return ResponseEntity.ok(service.findAllByUser(id, page, size, orderBy, direction));
     }
 }
 
