@@ -50,14 +50,23 @@ testImplementation 'org.springframework.security:spring-security-test'
 
 ---
 
+### 📊 Cobertura de Testes | Test Coverage
+
+O projeto utiliza **[JaCoCo](https://www.jacoco.org/jacoco/)** para gerar relatórios de cobertura de testes.
+Você pode visualizar o html pelo caminho:
+````
+buid/reports/jacoco/index.html
+````
+
+
+---
+
 ## ⚙️ Requisitos | Requirements
 
 - Java 17+
 - Maven ou Gradle
 - PostgreSQL
 - Docker (opcional para ambiente local | optional for local setup)
-
----
 
 ## 📦 Como Rodar Localmente | How to Run Locally
 
@@ -67,12 +76,12 @@ testImplementation 'org.springframework.security:spring-security-test'
    cd save-money-slot
    ```
 
-2. Configure o `application.properties` com suas credenciais do PostgreSQL.  
-   Configure `application.properties` with your PostgreSQL credentials.
+2. Configure o `.env` com suas variáveis de ambiente.  
+   Configure `.env` with your environment variables.
 
 3. Rode o projeto | Run the project:
    ```bash
-   ./gradlew bootRun
+   docker compose up -d --build
    ```
 
 4. Acesse a API | Access the API:
