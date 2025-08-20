@@ -101,21 +101,4 @@ public class UserService implements IUserService{
         return repository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found."));
     }
-
-    @Override
-    public User addValueToBalance(Long id, BigDecimal value) {
-        User oldUser = repository.getReferenceById(id);
-        BigDecimal newValue = oldUser.getBalance().add(value);
-        oldUser.setBalance(newValue);
-        return repository.save(oldUser);
-    }
-
-    @Override
-    public User subtractValueToBalance(Long id, BigDecimal value) {
-        User oldUser = repository.getReferenceById(id);
-        BigDecimal newValue = oldUser.getBalance().subtract(value);
-        oldUser.setBalance(newValue);
-        return repository.save(oldUser);
-    }
-
 }

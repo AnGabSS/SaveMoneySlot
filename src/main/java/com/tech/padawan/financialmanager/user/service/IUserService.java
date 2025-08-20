@@ -18,7 +18,4 @@ public interface IUserService {
     String delete(Long id);
     User updateUserCompleted(User user);
     User getUserEntityById(Long id);
-    User addValueToBalance(Long id, BigDecimal value);
-    User subtractValueToBalance(Long id, BigDecimal value);
-
 }
