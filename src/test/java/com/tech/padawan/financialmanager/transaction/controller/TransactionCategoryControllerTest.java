@@ -4,15 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tech.padawan.financialmanager.global.config.security.TestSecurityConfig;
 import com.tech.padawan.financialmanager.role.model.RoleType;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionCategoryDTO;
-import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
-import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
+import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionCategoryDTO;
 import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import com.tech.padawan.financialmanager.transaction.service.TransactionCategoryService;
 import com.tech.padawan.financialmanager.user.dto.CreateUserDTO;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.service.UserService;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,9 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
-import java.math.BigDecimal;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -37,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class TransactionControllerTest {
+class TransactionCategoryControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,8 +48,8 @@ class TransactionControllerTest {
 
     @Autowired
     private TransactionCategoryService categoryService;
-    private static String jwtToken;
 
+    private static String jwtToken;
 
     private String bearer() {
         return "Bearer " + jwtToken;
@@ -63,10 +58,10 @@ class TransactionControllerTest {
     @BeforeAll
     void setup() {
         CreateUserDTO createDto = new CreateUserDTO(
-                "Ezio Auditore da Virenze",
-                "ezio@virenze.com.it",
-                "password123",
-                java.time.LocalDate.parse("1940-04-03"),
+                "Altair Ibn-La’Ahad",
+                "altair@assassins.com",
+                "creed123",
+                java.time.LocalDate.parse("1935-07-11"),
                 RoleType.ADMIN
         );
 
@@ -74,7 +69,7 @@ class TransactionControllerTest {
         createdUserId = userCreated.getId();
 
         CreateTransactionCategoryDTO createCategoryDTO = new CreateTransactionCategoryDTO(
-                "Games",
+                "Entertainment",
                 TransactionType.EXPENSE,
                 createdUserId
         );
@@ -84,95 +79,86 @@ class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("Shoud create a transaction and return 201 code")
     @Order(1)
-    void shouldCreateATransactionAnd201Code() throws Exception {
-        CreateTransactionDTO createTransactionDTO = new CreateTransactionDTO(
-                BigDecimal.valueOf(200.0),
-                "Game pass",
-                createdUserId,
-                createdCategoryId
+    @DisplayName("Should create a category and return 201 code")
+    void shouldCreateACategoryAndReturn201Code() throws Exception {
+        CreateTransactionCategoryDTO createDTO = new CreateTransactionCategoryDTO(
+                "Food",
+                TransactionType.EXPENSE,
+                createdUserId
         );
 
-        mockMvc.perform(post("/transaction")
+        mockMvc.perform(post("/transaction/category")
                         .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createTransactionDTO)))
+                        .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.value").value(BigDecimal.valueOf(200.0)))
-                .andExpect(jsonPath("$.description").value("Game pass"))
+                .andExpect(jsonPath("$.name").value("Food"))
+                .andExpect(jsonPath("$.type").value("EXPENSE"))
                 .andReturn();
     }
 
     @Test
     @Order(2)
-    @DisplayName("Should return a page of transaction list and 200 code")
-    void shouldReturnAPageOfTransactionListAnd200Code() throws Exception{
-        mockMvc.perform(get("/transaction?page=1&size=10&orderBy=id&direction=ASC")
+    @DisplayName("Should return a page of categories list and 200 code")
+    void shouldReturnAPageOfCategoriesListAnd200Code() throws Exception {
+        mockMvc.perform(get("/transaction/category?page=0&size=10&orderBy=id&direction=ASC")
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
-                .andExpect(jsonPath("$.content[*].id", hasItem(1)))
-                .andExpect(jsonPath("$.content[*].description", hasItem("Game pass")));
-
+                .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$[*].id", hasItem(createdCategoryId.intValue())))
+                .andExpect(jsonPath("$[*].name", hasItem("Entertainment")));
     }
 
     @Test
     @Order(3)
-    @DisplayName("Should return a transaction by the ID and 200 code")
-    void shouldReturnATransactionByTheIDAnd200Code() throws Exception {
-        mockMvc.perform(get("/transaction/1")
+    @DisplayName("Should return a category by the ID and 200 code")
+    void shouldReturnACategoryByTheIDAnd200Code() throws Exception {
+        mockMvc.perform(get("/transaction/category/" + createdCategoryId)
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.description").value("Game pass"))
-                .andExpect(jsonPath("$.value").value(200.0));
+                .andExpect(jsonPath("$.id").value(createdCategoryId))
+                .andExpect(jsonPath("$.name").value("Entertainment"))
+                .andExpect(jsonPath("$.type").value("EXPENSE"));
     }
-
 
     @Test
     @Order(4)
-    @DisplayName("Should return a page of transaction list by user and 200 code")
-    void shouldReturnAPageOfTransactionListByUserAnd200Code() throws Exception {
-        mockMvc.perform(get("/transaction/user/1?page=1&size=10&orderBy=id&direction=ASC")
+    @DisplayName("Should return a page of categories by user and 200 code")
+    void shouldReturnACategoriesByUserAnd200Code() throws Exception {
+        mockMvc.perform(get("/transaction/category/user/" + createdUserId + "?page=0&size=10&orderBy=id&direction=ASC")
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
-                .andExpect(jsonPath("$.content[*].id", hasItem(1)))
-                .andExpect(jsonPath("$.content[*].description", hasItem("Game pass")))
-                .andExpect(jsonPath("$.content[*].value", hasItem(200.0)));
-
+                .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$[*].id", hasItem(createdCategoryId.intValue())))
+                .andExpect(jsonPath("$[*].name", hasItem("Entertainment")));
     }
 
     @Test
     @Order(5)
-    @DisplayName("Should update a transaction and return 200 code")
-    void shouldUpdateATransactionAndReturn200Code() throws Exception{
-        UpdateTransactionDTO updateDTO = new UpdateTransactionDTO(
-                BigDecimal.valueOf(300.0),
-                "Game pass ultimate",
-                createdCategoryId
+    @DisplayName("Should update a category and return 200 code")
+    void shouldUpdateACategoryAndReturn200Code() throws Exception {
+        UpdateTransactionCategoryDTO updateDTO = new UpdateTransactionCategoryDTO(
+                "Entertainment Updated",
+                TransactionType.EXPENSE
         );
 
-        mockMvc.perform(put("/transaction/1")
+        mockMvc.perform(put("/transaction/category/" + createdCategoryId)
                         .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.description").value("Game pass ultimate"))
-                .andExpect(jsonPath("$.value").value((300.0)));
-
+                .andExpect(jsonPath("$.id").value(createdCategoryId))
+                .andExpect(jsonPath("$.name").value("Entertainment Updated"));
     }
 
     @Test
     @Order(6)
-    @DisplayName("Should delete a transaction and return 200 code")
-    void ShouldDeleteATransactionAndReturn200code() throws Exception{
-        mockMvc.perform(delete("/transaction/1")
+    @DisplayName("Should delete a category and return 200 code")
+    void shouldDeleteACategoryAndReturn200Code() throws Exception {
+        mockMvc.perform(delete("/transaction/category/" + createdCategoryId)
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Transaction deleted"));
+                .andExpect(content().string("Transaction category deleted"));
     }
-
 }

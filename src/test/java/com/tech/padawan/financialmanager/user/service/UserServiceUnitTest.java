@@ -77,4 +77,5 @@ class UserServiceUnitTest {
         verify(repository, times(1)).save(any(User.class));
         verify(passwordEncoder, times(1)).encode("david123456");
     }
+
 }
