@@ -68,7 +68,6 @@ class UserAuthenticationFilterTest {
         when(request.getMethod()).thenReturn("GET");
         when(request.getServletPath()).thenReturn("/users/login"); // ajuste para um endpoint que esteja em SecurityConfiguration.PUBLIC_ENDPOINTS
 
-        // proteção extra: caso caia erroneamente no bloco de erro
         StringWriter responseWriter = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(responseWriter));
 
