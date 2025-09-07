@@ -15,7 +15,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -109,6 +111,11 @@ public class TransactionService implements ITransactionService{
         PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
         Page<Transaction> list = repository.findAllByUserId(pageRequest, userid);
         return list.map(SearchedTransactionDTO::from);
+    }
+
+    @Override
+    public List<Transaction> findAllByUserAndMonth(long userId, Date initialDate, Date finalDate) {
+        return repository.findAllByUserIdAndCreatedAtBetween(userId, initialDate, finalDate);
     }
 
 }
