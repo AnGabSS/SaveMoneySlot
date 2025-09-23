@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.global.config.security;
 
+import com.tech.padawan.financialmanager.global.config.SaveMoneySlotConfiguration;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,13 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 @Profile("!test")
 public class SecurityConfiguration {
-    private static final Dotenv dotenv = Dotenv.load();
 
     private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
+
+    private final String FRONT_URL;
 
     public static final String[] PUBLIC_ENDPOINTS = {
             "/users/login",
@@ -46,12 +47,20 @@ public class SecurityConfiguration {
             "/webjars/**",
             "/configuration/ui",
             "/configuration/security",
-            "/favicon.ico"
+            "/favicon.ico",
+            "/actuator",
+            "/actuator/**"
     };
 
     public static final String[] ADMIN_ENDPOINTS = {
             "/transaction"
     };
+
+    public SecurityConfiguration(JwtTokenService jwtTokenService, UserRepository userRepository, SaveMoneySlotConfiguration configuration) {
+        this.jwtTokenService = jwtTokenService;
+        this.userRepository = userRepository;
+        this.FRONT_URL = configuration.front_url();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -89,7 +98,6 @@ public class SecurityConfiguration {
 
     @Bean
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
-        String FRONT_URL = dotenv.get("FRONT_URL");
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Collections.singletonList(FRONT_URL));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS",  "HEAD", "TRACE", "CONNECT"));

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,7 @@ public class TransactionService implements ITransactionService{
                 .value(transactionDTO.value())
                 .description(transactionDTO.description())
                 .category(category)
-                .createdAt(new Date())
+                .createdAt(LocalDateTime.now())
                 .user(user)
                 .build();
 
@@ -114,7 +115,7 @@ public class TransactionService implements ITransactionService{
     }
 
     @Override
-    public List<Transaction> findAllByUserAndMonth(long userId, Date initialDate, Date finalDate) {
+    public List<Transaction> findAllByUserAndMonth(long userId, LocalDateTime initialDate, LocalDateTime finalDate) {
         return repository.findAllByUserIdAndCreatedAtBetween(userId, initialDate, finalDate);
     }
 

@@ -1,20 +1,19 @@
 package com.tech.padawan.financialmanager.report.service;
 
 import com.tech.padawan.financialmanager.report.dto.SavedMoneyByMonth;
+import com.tech.padawan.financialmanager.report.dto.TransactionCountByCategoryDTO;
+import com.tech.padawan.financialmanager.report.dto.TransactionCountByTypeDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import com.tech.padawan.financialmanager.transaction.service.ITransactionService;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,12 +26,12 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public List<SavedMoneyByMonth> getSavedMoneyByMonth(Long userId, Date initialDate, Date finalDate) {
+    public List<SavedMoneyByMonth> getSavedMoneyByMonth(Long userId, LocalDateTime initialDate, LocalDateTime finalDate) {
         List<Transaction> transactions = transactionService.findAllByUserAndMonth(userId, initialDate, finalDate);
 
         Map<YearMonth, BigDecimal> savedMoneyByMonthMap = transactions.stream()
                 .collect(Collectors.groupingBy(
-                        transaction -> YearMonth.from(transaction.getCreatedAt().toInstant()
+                        transaction -> YearMonth.from(transaction.getCreatedAt()
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDateTime()),
                         Collectors.reducing(
@@ -52,5 +51,43 @@ public class ReportService implements IReportService {
                         entry.getValue()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TransactionCountByTypeDTO> getMonthlyTransactionCountGroupedByType(Long userId) {
+        YearMonth yearMonth = YearMonth.now();
+        LocalDateTime firstDayOfMonth = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime lastDayOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+
+        List<Transaction> transactions = transactionService.findAllByUserAndMonth(userId, firstDayOfMonth, lastDayOfMonth);
+
+        Map<TransactionType, Map<String, BigDecimal>> groupedAmounts = transactions.stream()
+                .collect(Collectors.groupingBy(
+                        transaction -> transaction.getCategory().getType(),
+                        Collectors.groupingBy(
+                                transaction -> transaction.getCategory().getName(),
+                                Collectors.reducing(
+                                        BigDecimal.ZERO,
+                                        Transaction::getValue,
+                                        BigDecimal::add
+                                )
+                        )
+                ));
+
+        return groupedAmounts.entrySet().stream()
+                .map(entryByType -> {
+                    TransactionType type = entryByType.getKey();
+                    Map<String, BigDecimal> amountsByCategory = entryByType.getValue();
+
+                    List<TransactionCountByCategoryDTO> categoryList = amountsByCategory.entrySet().stream()
+                            .map(entryByCategory -> new TransactionCountByCategoryDTO(
+                                    entryByCategory.getKey(),
+                                    entryByCategory.getValue() // O valor agora é um BigDecimal
+                            ))
+                            .toList();
+
+                    return new TransactionCountByTypeDTO(type, categoryList);
+                })
+                .toList();
     }
 }

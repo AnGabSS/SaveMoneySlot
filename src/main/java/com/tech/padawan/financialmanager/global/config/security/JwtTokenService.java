@@ -4,21 +4,27 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.tech.padawan.financialmanager.global.config.SaveMoneySlotConfiguration;
 import com.tech.padawan.financialmanager.user.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import io.github.cdimascio.dotenv.Dotenv;
 
 
 @Service
 public class JwtTokenService {
-    private static final Dotenv dotenv = Dotenv.load();
 
-    private static final String SECRET = dotenv.get("SECRET_KEY");
-    private static final String ISSUER = dotenv.get("JWT_ISSUER");
+    private final String SECRET;
+    private final String ISSUER;
+
+    public JwtTokenService(SaveMoneySlotConfiguration configuration) {
+        this.SECRET = configuration.secret_key();
+        this.ISSUER = configuration.jwt_issuer();
+    }
+
 
     public String generateToken(User user){
         try{
@@ -52,6 +58,6 @@ public class JwtTokenService {
     }
 
     private Instant expirationDate(){
-        return ZonedDateTime.now(ZoneId.of("America/Recife")).plusHours(4).toInstant();
+        return ZonedDateTime.now(ZoneId.of("America/Recife")).plusHours(8).toInstant();
     }
 }

@@ -1,0 +1,21 @@
+server:
+  port: 8080
+spring:
+  application:
+    name:
+      SaveMoney$lot
+  config:
+    import: optional:configserver:http://localhost:8888/
+  cloud:
+    config:
+      profile: prod
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+

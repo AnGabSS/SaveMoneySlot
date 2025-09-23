@@ -5,6 +5,7 @@ import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public record SearchedTransactionDTO(
@@ -12,7 +13,7 @@ public record SearchedTransactionDTO(
         String description,
         BigDecimal value,
         String category,
-        Date createdAt,
+        LocalDateTime createdAt,
         String user
 ) {
 

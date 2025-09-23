@@ -1,15 +1,14 @@
 package com.tech.padawan.financialmanager.report.controller;
 
 import com.tech.padawan.financialmanager.report.dto.SavedMoneyByMonth;
+import com.tech.padawan.financialmanager.report.dto.TransactionCountByTypeDTO;
 import com.tech.padawan.financialmanager.report.service.ReportService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,15 +18,7 @@ public class ReportController {
 
     private final ReportService service;
 
-    private static final Date DEFAULT_INITIAL_DATE;
-
-    static {
-        try {
-            DEFAULT_INITIAL_DATE = new SimpleDateFormat("yyyy-MM-dd").parse("1900-01-01");
-        } catch (ParseException e) {
-            throw new IllegalStateException("Não foi possível parsear a data padrão inicial.", e);
-        }
-    }
+    private static final LocalDateTime DEFAULT_INITIAL_DATE = LocalDateTime.of(1900, 1, 1, 0, 0);;
 
 
     public ReportController(ReportService service){
@@ -37,17 +28,23 @@ public class ReportController {
     @GetMapping("/saved-money-by-month/{userId}")
     public ResponseEntity<List<SavedMoneyByMonth>> getSavedMoneyByMonth(
             @PathVariable("userId") long userId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<Date> initialDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<Date> finalDate
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDateTime> initialDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDateTime> finalDate
     ) {
-        Date effectiveInitialDate = initialDate.orElse(DEFAULT_INITIAL_DATE);
-        Date effectiveFinalDate = finalDate.orElse(new Date());
+        LocalDateTime effectiveInitialDate = initialDate.orElse(DEFAULT_INITIAL_DATE);
+        LocalDateTime effectiveFinalDate = finalDate.orElse(LocalDateTime.now());
 
-        if (effectiveInitialDate.after(effectiveFinalDate)) {
+        if (effectiveInitialDate.isAfter(effectiveFinalDate)) {
             return ResponseEntity.badRequest().build();
         }
 
         List<SavedMoneyByMonth> report = service.getSavedMoneyByMonth(userId, effectiveInitialDate, effectiveFinalDate);
+        return ResponseEntity.ok(report);
+    }
+
+    @GetMapping("/transaction-count-per-type/{userId}")
+    public ResponseEntity<List<TransactionCountByTypeDTO>> getMonthlyTransactionCountGroupedByType(@PathVariable("userId") long userId){
+        List<TransactionCountByTypeDTO> report = service.getMonthlyTransactionCountGroupedByType(userId);
         return ResponseEntity.ok(report);
     }
 }
