@@ -54,12 +54,12 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public List<TransactionCountByTypeDTO> getMonthlyTransactionCountGroupedByType(Long userId) {
+    public List<TransactionCountByTypeDTO> getMonthlyTransactionCountGroupedByType(String email) {
         YearMonth yearMonth = YearMonth.now();
         LocalDateTime firstDayOfMonth = yearMonth.atDay(1).atStartOfDay();
         LocalDateTime lastDayOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
 
-        List<Transaction> transactions = transactionService.findAllByUserAndMonth(userId, firstDayOfMonth, lastDayOfMonth);
+        List<Transaction> transactions = transactionService.findAllByUserEmailAndMonth(email, firstDayOfMonth, lastDayOfMonth);
 
         Map<TransactionType, Map<String, BigDecimal>> groupedAmounts = transactions.stream()
                 .collect(Collectors.groupingBy(

@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface IReportService {
     List<SavedMoneyByMonth> getSavedMoneyByMonth(Long userId, LocalDateTime initialDate, LocalDateTime finalDate);
-    List<TransactionCountByTypeDTO> getMonthlyTransactionCountGroupedByType(Long userId);
+    List<TransactionCountByTypeDTO> getMonthlyTransactionCountGroupedByType(String email);
 }

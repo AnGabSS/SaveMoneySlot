@@ -3,7 +3,6 @@ package com.tech.padawan.financialmanager.global.config.security;
 import com.tech.padawan.financialmanager.global.config.SaveMoneySlotConfiguration;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.CustomUserDetailsService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,7 +20,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import io.github.cdimascio.dotenv.Dotenv;
 
 import java.util.Arrays;
 import java.util.Collections;

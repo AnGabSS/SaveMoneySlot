@@ -18,4 +18,5 @@ public interface ITransactionService {
     String delete(Long id);
     Page<SearchedTransactionDTO> findAllByUser(long userid, int page, int size, String orderBy, String direction);
     List<Transaction> findAllByUserAndMonth(long userId, LocalDateTime initialDate, LocalDateTime finalDate);
+    List<Transaction> findAllByUserEmailAndMonth(String email, LocalDateTime initialDate, LocalDateTime finalDate);
 }

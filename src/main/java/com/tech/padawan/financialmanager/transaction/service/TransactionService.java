@@ -119,4 +119,9 @@ public class TransactionService implements ITransactionService{
         return repository.findAllByUserIdAndCreatedAtBetween(userId, initialDate, finalDate);
     }
 
+    @Override
+    public List<Transaction> findAllByUserEmailAndMonth(String email, LocalDateTime initialDate, LocalDateTime finalDate) {
+        return repository.findAllByUserEmailAndCreatedAtBetween(email, initialDate, finalDate);
+    }
+
 }

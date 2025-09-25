@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.report.controller;
 
+import com.tech.padawan.financialmanager.global.config.security.JwtTokenService;
 import com.tech.padawan.financialmanager.report.dto.SavedMoneyByMonth;
 import com.tech.padawan.financialmanager.report.dto.TransactionCountByTypeDTO;
 import com.tech.padawan.financialmanager.report.service.ReportService;
@@ -17,12 +18,16 @@ import java.util.Optional;
 public class ReportController {
 
     private final ReportService service;
+    private final JwtTokenService tokenService;
 
     private static final LocalDateTime DEFAULT_INITIAL_DATE = LocalDateTime.of(1900, 1, 1, 0, 0);;
 
 
-    public ReportController(ReportService service){
+    public ReportController(
+            ReportService service,
+            JwtTokenService tokenService){
         this.service = service;
+        this.tokenService = tokenService;
     }
 
     @GetMapping("/saved-money-by-month/{userId}")
@@ -42,9 +47,11 @@ public class ReportController {
         return ResponseEntity.ok(report);
     }
 
-    @GetMapping("/transaction-count-per-type/{userId}")
-    public ResponseEntity<List<TransactionCountByTypeDTO>> getMonthlyTransactionCountGroupedByType(@PathVariable("userId") long userId){
-        List<TransactionCountByTypeDTO> report = service.getMonthlyTransactionCountGroupedByType(userId);
+    @GetMapping("/transaction-count-per-type")
+    public ResponseEntity<List<TransactionCountByTypeDTO>> getMonthlyTransactionCountGroupedByType(@RequestHeader("Authorization") String authorizationHeader){
+        String jwtToken = authorizationHeader.substring(7);
+        String email = tokenService.getSubjectFromToken(jwtToken);
+        List<TransactionCountByTypeDTO> report = service.getMonthlyTransactionCountGroupedByType(email);
         return ResponseEntity.ok(report);
     }
 }
