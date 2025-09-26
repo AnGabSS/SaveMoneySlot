@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,20 +32,27 @@ public class ReportController {
         this.tokenService = tokenService;
     }
 
-    @GetMapping("/saved-money-by-month/{userId}")
+    @GetMapping("/saved-money-by-month")
     public ResponseEntity<List<SavedMoneyByMonth>> getSavedMoneyByMonth(
-            @PathVariable("userId") long userId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDateTime> initialDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDateTime> finalDate
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDate> initialDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDate> finalDate
     ) {
-        LocalDateTime effectiveInitialDate = initialDate.orElse(DEFAULT_INITIAL_DATE);
-        LocalDateTime effectiveFinalDate = finalDate.orElse(LocalDateTime.now());
+        String jwtToken = authorizationHeader.substring(7);
+        String email = tokenService.getSubjectFromToken(jwtToken);
+        LocalDateTime effectiveInitialDate = initialDate
+                .map(LocalDate::atStartOfDay)
+                .orElse(DEFAULT_INITIAL_DATE);
+
+        LocalDateTime effectiveFinalDate = finalDate
+                .map(date -> date.atTime(LocalTime.MAX))
+                .orElse(LocalDateTime.now());
 
         if (effectiveInitialDate.isAfter(effectiveFinalDate)) {
             return ResponseEntity.badRequest().build();
         }
 
-        List<SavedMoneyByMonth> report = service.getSavedMoneyByMonth(userId, effectiveInitialDate, effectiveFinalDate);
+        List<SavedMoneyByMonth> report = service.getSavedMoneyByMonth(email, effectiveInitialDate, effectiveFinalDate);
         return ResponseEntity.ok(report);
     }
 

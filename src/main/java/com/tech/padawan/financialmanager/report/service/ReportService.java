@@ -26,8 +26,8 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public List<SavedMoneyByMonth> getSavedMoneyByMonth(Long userId, LocalDateTime initialDate, LocalDateTime finalDate) {
-        List<Transaction> transactions = transactionService.findAllByUserAndMonth(userId, initialDate, finalDate);
+    public List<SavedMoneyByMonth> getSavedMoneyByMonth(String email, LocalDateTime initialDate, LocalDateTime finalDate) {
+        List<Transaction> transactions = transactionService.findAllByUserEmailAndMonth(email, initialDate, finalDate);
 
         Map<YearMonth, BigDecimal> savedMoneyByMonthMap = transactions.stream()
                 .collect(Collectors.groupingBy(

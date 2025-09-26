@@ -8,6 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 public interface IReportService {
-    List<SavedMoneyByMonth> getSavedMoneyByMonth(Long userId, LocalDateTime initialDate, LocalDateTime finalDate);
+    List<SavedMoneyByMonth> getSavedMoneyByMonth(String email, LocalDateTime initialDate, LocalDateTime finalDate);
     List<TransactionCountByTypeDTO> getMonthlyTransactionCountGroupedByType(String email);
 }

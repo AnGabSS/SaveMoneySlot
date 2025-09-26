@@ -28,16 +28,20 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFoundException(NotFoundException ex){
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    public ResponseEntity<Map<String, String>> handleNotFoundException(
+            NotFoundException ex
+    ) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", "Not Found");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(NotFoundException ex){
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex){
         Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
+        error.put("error", "Runtime Exception");
+        error.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
