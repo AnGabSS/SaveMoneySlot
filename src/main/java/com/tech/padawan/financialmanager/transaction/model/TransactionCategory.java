@@ -19,6 +19,7 @@ public class TransactionCategory {
     private Long id;
     @NotNull(message = "Name is required")
     private String name;
+    @Enumerated(EnumType.STRING)
     @NotNull(message = "Type is required")
     private TransactionType type;
     @ManyToOne

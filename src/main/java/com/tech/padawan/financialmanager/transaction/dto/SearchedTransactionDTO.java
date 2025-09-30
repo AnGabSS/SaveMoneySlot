@@ -1,6 +1,7 @@
 package com.tech.padawan.financialmanager.transaction.dto;
 
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
+import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -12,7 +13,7 @@ public record SearchedTransactionDTO(
         Long id,
         String description,
         BigDecimal value,
-        String category,
+        TransactionCategory category,
         LocalDateTime createdAt,
         String user
 ) {
@@ -23,7 +24,6 @@ public record SearchedTransactionDTO(
 
     public static SearchedTransactionDTO from(Transaction transaction, boolean includeUserUrl) {
         Long userId = transaction.getUser() != null ? transaction.getUser().getId() : null;
-        Long categoryId = transaction.getCategory() != null ? transaction.getCategory().getId() : null;
 
         String userUrl = null;
         if (includeUserUrl && userId != null) {
@@ -38,24 +38,12 @@ public record SearchedTransactionDTO(
             }
         }
 
-        String categoryUrl = null;
-        if (includeUserUrl && userId != null) {
-            try {
-                categoryUrl = ServletUriComponentsBuilder
-                        .fromCurrentContextPath()
-                        .path("/transaction/category/{id}")
-                        .buildAndExpand(userId)
-                        .toUriString();
-            } catch (IllegalStateException e) {
-                categoryUrl = null;
-            }
-        }
 
         return new SearchedTransactionDTO(
                 transaction.getId(),
                 transaction.getDescription(),
                 transaction.getValue(),
-                categoryUrl,
+                transaction.getCategory(),
                 transaction.getCreatedAt(),
                 userUrl
         );
