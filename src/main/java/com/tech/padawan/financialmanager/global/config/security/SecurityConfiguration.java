@@ -51,7 +51,10 @@ public class SecurityConfiguration {
     };
 
     public static final String[] ADMIN_ENDPOINTS = {
-            "/transaction"
+            "/transaction",
+            "/transaction/**",
+            "/goals",
+            "/goals/**"
     };
 
     public SecurityConfiguration(JwtTokenService jwtTokenService, UserRepository userRepository, SaveMoneySlotConfiguration configuration) {
@@ -69,7 +72,7 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(ADMIN_ENDPOINTS).hasAuthority("ADMIN")
+                        .requestMatchers(ADMIN_ENDPOINTS).hasAnyAuthority()
                         .anyRequest().permitAll())
                 .addFilterBefore(new UserAuthenticationFilter(jwtTokenService, userRepository),
                         UsernamePasswordAuthenticationFilter.class)
