@@ -13,7 +13,7 @@ public record SearchedTransactionDTO(
         Long id,
         String description,
         BigDecimal value,
-        TransactionCategory category,
+        SearchedTransactionCategoryDTO category,
         LocalDateTime createdAt,
         String user
 ) {
@@ -43,7 +43,7 @@ public record SearchedTransactionDTO(
                 transaction.getId(),
                 transaction.getDescription(),
                 transaction.getValue(),
-                transaction.getCategory(),
+                SearchedTransactionCategoryDTO.from(transaction.getCategory()),
                 transaction.getCreatedAt(),
                 userUrl
         );

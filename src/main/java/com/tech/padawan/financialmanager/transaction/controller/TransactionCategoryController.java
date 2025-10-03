@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.transaction.controller;
 
+import com.tech.padawan.financialmanager.global.config.security.JwtTokenService;
 import com.tech.padawan.financialmanager.global.exception.NotFoundException;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionCategoryDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionCategoryDTO;
@@ -27,17 +28,26 @@ import java.util.List;
 )
 public class TransactionCategoryController {
 
-    @Autowired
-    private ITransactionCategoryService service;
+
+    private final ITransactionCategoryService service;
+    private final JwtTokenService tokenService;
+
+    public TransactionCategoryController(ITransactionCategoryService service, JwtTokenService tokenService ){
+        this.service = service;
+        this.tokenService = tokenService;
+    }
 
     @GetMapping
     public ResponseEntity<List<SearchedTransactionCategoryDTO>> findAll(
+            @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "4") int size,
             @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ) {
-        return ResponseEntity.ok(service.findAll(page, size, orderBy, direction).getContent());
+        String jwtToken = authorizationHeader.substring(7);
+        String email = tokenService.getSubjectFromToken(jwtToken);
+        return ResponseEntity.ok(service.findAllByUserEmail(email, page, size, orderBy, direction).getContent());
     }
 
     @GetMapping("/{id}")

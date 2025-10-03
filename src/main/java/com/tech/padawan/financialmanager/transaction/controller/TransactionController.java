@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.transaction.controller;
 
+import com.tech.padawan.financialmanager.global.config.security.JwtTokenService;
 import com.tech.padawan.financialmanager.global.exception.NotFoundException;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
@@ -34,18 +35,24 @@ public class TransactionController {
 
     private final ITransactionService service;
 
-    public TransactionController(ITransactionService service) {
+    private final JwtTokenService tokenService;
+
+    public TransactionController(ITransactionService service, JwtTokenService tokenService) {
         this.service = service;
+        this.tokenService = tokenService;
     }
 
     @GetMapping
     public ResponseEntity<Page<SearchedTransactionDTO>> findAll(
+            @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "4") int size,
             @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ){
-        return ResponseEntity.ok(service.findAll(page, size, orderBy, direction));
+        String jwtToken = authorizationHeader.substring(7);
+        String email = tokenService.getSubjectFromToken(jwtToken);
+        return ResponseEntity.ok(service.findAllByUserEmail(email, page, size, orderBy, direction));
     }
 
     @GetMapping("/{id}")

@@ -75,7 +75,7 @@ class TransactionServiceTest {
         Page<Transaction> page = new PageImpl<>(List.of(mockTransaction));
         when(repository.findAll(any(PageRequest.class))).thenReturn(page);
 
-        Page<SearchedTransactionDTO> result = service.findAll(1, 10, "id", "ASC");
+        Page<SearchedTransactionDTO> result = service.findAllByUserEmail(mockUser.getEmail(), 1, 10, "id", "ASC");
 
         assertEquals(1, result.getTotalElements());
         verify(repository).findAll(any(PageRequest.class));

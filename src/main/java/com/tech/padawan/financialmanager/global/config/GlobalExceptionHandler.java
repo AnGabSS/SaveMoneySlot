@@ -42,6 +42,9 @@ public class GlobalExceptionHandler {
         Map<String, String> error = new HashMap<>();
         error.put("error", "Runtime Exception");
         error.put("message", ex.getMessage());
+        System.out.println(ex);
+        ex.printStackTrace();
+        System.out.println("Error caused by: " + ex.getCause());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 

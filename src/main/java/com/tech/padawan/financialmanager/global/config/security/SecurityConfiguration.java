@@ -50,7 +50,7 @@ public class SecurityConfiguration {
             "/actuator/**"
     };
 
-    public static final String[] ADMIN_ENDPOINTS = {
+    public static final String[] PRIVATE_ENDPOINTS = {
             "/transaction",
             "/transaction/**",
             "/goals",
@@ -72,7 +72,7 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(ADMIN_ENDPOINTS).hasAnyAuthority()
+                        .requestMatchers(PRIVATE_ENDPOINTS).authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(new UserAuthenticationFilter(jwtTokenService, userRepository),
                         UsernamePasswordAuthenticationFilter.class)

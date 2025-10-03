@@ -11,12 +11,11 @@ import java.util.Date;
 import java.util.List;
 
 public interface ITransactionService {
-    Page<SearchedTransactionDTO> findAll(int page, int size, String orderBy, String direction);
+    Page<SearchedTransactionDTO> findAllByUserEmail(String email, int page, int size, String orderBy, String direction);
     SearchedTransactionDTO getById(Long id);
     Transaction create(CreateTransactionDTO transactionDTO);
     SearchedTransactionDTO update(Long id, UpdateTransactionDTO transactionDTO);
     String delete(Long id);
     Page<SearchedTransactionDTO> findAllByUser(long userid, int page, int size, String orderBy, String direction);
-    List<Transaction> findAllByUserAndMonth(long userId, LocalDateTime initialDate, LocalDateTime finalDate);
     List<Transaction> findAllByUserEmailAndMonth(String email, LocalDateTime initialDate, LocalDateTime finalDate);
 }
