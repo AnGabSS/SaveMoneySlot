@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 
 public interface ITransactionCategoryService {
     Page<SearchedTransactionCategoryDTO> findAll(int page, int size, String orderBy, String direction);
+    Page<SearchedTransactionCategoryDTO> findAllByUserEmail(String email, int page, int size, String orderBy, String direction);
     SearchedTransactionCategoryDTO getById(Long id);
     TransactionCategory create(CreateTransactionCategoryDTO transactionDTO);
     SearchedTransactionCategoryDTO update(Long id, UpdateTransactionCategoryDTO transactionDTO);

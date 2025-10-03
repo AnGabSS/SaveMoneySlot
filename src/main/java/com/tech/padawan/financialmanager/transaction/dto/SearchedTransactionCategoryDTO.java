@@ -9,7 +9,7 @@ public record SearchedTransactionCategoryDTO(
         Long id,
         String name,
         TransactionType type,
-        String userURL
+        String user
 ) {
 
     public static SearchedTransactionCategoryDTO from(TransactionCategory category) {

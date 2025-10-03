@@ -15,7 +15,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -40,9 +43,9 @@ public class TransactionService implements ITransactionService{
 
 
     @Override
-    public Page<SearchedTransactionDTO> findAll(int page, int size, String orderBy, String direction) {
+    public Page<SearchedTransactionDTO> findAllByUserEmail(String email, int page, int size, String orderBy, String direction) {
         PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<Transaction> list = repository.findAll(pageRequest);
+        Page<Transaction> list = repository.findAllByUserEmail(pageRequest, email);
         return list.map(SearchedTransactionDTO::from);
     }
 
@@ -66,7 +69,7 @@ public class TransactionService implements ITransactionService{
                 .value(transactionDTO.value())
                 .description(transactionDTO.description())
                 .category(category)
-                .createdAt(new Date())
+                .createdAt(LocalDateTime.now())
                 .user(user)
                 .build();
 
@@ -109,6 +112,11 @@ public class TransactionService implements ITransactionService{
         PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
         Page<Transaction> list = repository.findAllByUserId(pageRequest, userid);
         return list.map(SearchedTransactionDTO::from);
+    }
+
+    @Override
+    public List<Transaction> findAllByUserEmailAndMonth(String email, LocalDateTime initialDate, LocalDateTime finalDate) {
+        return repository.findAllByUserEmailAndCreatedAtBetween(email, initialDate, finalDate);
     }
 
 }

@@ -2,6 +2,7 @@ package com.tech.padawan.financialmanager.user.service;
 
 import com.tech.padawan.financialmanager.global.config.security.JwtTokenService;
 import com.tech.padawan.financialmanager.role.model.Role;
+import com.tech.padawan.financialmanager.role.repository.RoleRepository;
 import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
@@ -28,6 +29,7 @@ public class UserService implements IUserService{
     private final JwtTokenService jwtTokenService;
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Override
     public Page<UserSearchedDTO> listAll(Integer page, Integer size, String orderBy, String direction) {
@@ -63,12 +65,13 @@ public class UserService implements IUserService{
 
         @Override
     public User create(CreateUserDTO userDTO) {
+        Role userRole = roleRepository.findByName(userDTO.role()).orElseThrow(() -> new RuntimeException("Error: Role not found"));
         User user = User.builder()
                 .name(userDTO.name())
                 .email(userDTO.email())
                 .password(passwordEncoder.encode(userDTO.password()))
                 .birthdate(userDTO.birthdate())
-                .roles(List.of(Role.builder().name(userDTO.role()).build()))
+                .roles(List.of(userRole))
                 .balance(BigDecimal.ZERO)
                 .build();
         return repository.save(user);

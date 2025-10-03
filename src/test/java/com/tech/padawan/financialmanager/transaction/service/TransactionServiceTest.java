@@ -20,6 +20,7 @@ import org.mockito.*;
 import org.springframework.data.domain.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,7 +64,7 @@ class TransactionServiceTest {
                 .value(BigDecimal.valueOf(100.0))
                 .description("Salary")
                 .category(mockIncomeCategory)
-                .createdAt(new Date())
+                .createdAt(LocalDateTime.now())
                 .user(mockUser)
                 .build();
     }
@@ -74,7 +75,7 @@ class TransactionServiceTest {
         Page<Transaction> page = new PageImpl<>(List.of(mockTransaction));
         when(repository.findAll(any(PageRequest.class))).thenReturn(page);
 
-        Page<SearchedTransactionDTO> result = service.findAll(1, 10, "id", "ASC");
+        Page<SearchedTransactionDTO> result = service.findAllByUserEmail(mockUser.getEmail(), 1, 10, "id", "ASC");
 
         assertEquals(1, result.getTotalElements());
         verify(repository).findAll(any(PageRequest.class));

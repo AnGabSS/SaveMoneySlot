@@ -39,6 +39,13 @@ public class TransactionCategoryService implements ITransactionCategoryService{
     }
 
     @Override
+    public Page<SearchedTransactionCategoryDTO> findAllByUserEmail(String email, int page, int size, String orderBy, String direction) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+        Page<TransactionCategory> list = repository.findAllByUserEmail(pageRequest, email);
+        return list.map(SearchedTransactionCategoryDTO::from);
+    }
+
+    @Override
     public SearchedTransactionCategoryDTO getById(Long id) {
         TransactionCategory category = Optional.of(repository.findById(id)).get().orElseThrow(() -> new TransactionCategoryNotFound("Transaction Category with id " + id + " not found."));
         return SearchedTransactionCategoryDTO.from(category);

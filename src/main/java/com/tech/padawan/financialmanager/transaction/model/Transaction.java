@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -27,7 +28,7 @@ public class Transaction {
     private BigDecimal value;
     @NotBlank(message = "Description is required")
     private String description;
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @NotNull(message = "Category is required")
