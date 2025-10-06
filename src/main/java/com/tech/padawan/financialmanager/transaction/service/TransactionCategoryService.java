@@ -39,9 +39,9 @@ public class TransactionCategoryService implements ITransactionCategoryService{
     }
 
     @Override
-    public Page<SearchedTransactionCategoryDTO> findAllByUserEmail(String email, int page, int size, String orderBy, String direction) {
+    public Page<SearchedTransactionCategoryDTO> findAllByUserId(Long id, int page, int size, String orderBy, String direction) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<TransactionCategory> list = repository.findAllByUserEmail(pageRequest, email);
+        Page<TransactionCategory> list = repository.findAllByUserId(pageRequest, id);
         return list.map(SearchedTransactionCategoryDTO::from);
     }
 
@@ -79,13 +79,6 @@ public class TransactionCategoryService implements ITransactionCategoryService{
         this.getById(id);
         repository.deleteById(id);
         return "Transaction category deleted";
-    }
-
-    @Override
-    public Page<SearchedTransactionCategoryDTO> findAllByUser(long userid, int page, int size, String orderBy, String direction) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<TransactionCategory> list = repository.findAllByUserId(pageRequest, userid);
-        return list.map(SearchedTransactionCategoryDTO::from);
     }
 
     @Override

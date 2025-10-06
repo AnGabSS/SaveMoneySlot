@@ -43,9 +43,9 @@ public class TransactionService implements ITransactionService{
 
 
     @Override
-    public Page<SearchedTransactionDTO> findAllByUserEmail(String email, int page, int size, String orderBy, String direction) {
+    public Page<SearchedTransactionDTO> findAllByUserId(Long id, int page, int size, String orderBy, String direction) {
         PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<Transaction> list = repository.findAllByUserEmail(pageRequest, email);
+        Page<Transaction> list = repository.findAllByUserId(pageRequest, id);
         return list.map(SearchedTransactionDTO::from);
     }
 
@@ -108,15 +108,8 @@ public class TransactionService implements ITransactionService{
     }
 
     @Override
-    public Page<SearchedTransactionDTO> findAllByUser(long userid, int page, int size, String orderBy, String direction) {
-        PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<Transaction> list = repository.findAllByUserId(pageRequest, userid);
-        return list.map(SearchedTransactionDTO::from);
-    }
-
-    @Override
-    public List<Transaction> findAllByUserEmailAndMonth(String email, LocalDateTime initialDate, LocalDateTime finalDate) {
-        return repository.findAllByUserEmailAndCreatedAtBetween(email, initialDate, finalDate);
+    public List<Transaction> findAllByUserIdAndMonth(Long id, LocalDateTime initialDate, LocalDateTime finalDate) {
+        return repository.findAllByUserIdAndCreatedAtBetween(id, initialDate, finalDate);
     }
 
 }

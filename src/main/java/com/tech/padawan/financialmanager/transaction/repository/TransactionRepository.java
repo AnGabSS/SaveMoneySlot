@@ -13,6 +13,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     Page<Transaction> findAllByUserId(Pageable pageable, Long userId);
     Page<Transaction> findAllByUserEmail(Pageable pageable, String email);
-    List<Transaction> findAllByUserEmailAndCreatedAtBetween(String email, LocalDateTime startDate, LocalDateTime endDate);
+    List<Transaction> findAllByUserIdAndCreatedAtBetween(Long id, LocalDateTime startDate, LocalDateTime endDate);
 
 }

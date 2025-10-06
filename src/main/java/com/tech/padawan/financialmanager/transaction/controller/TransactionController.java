@@ -51,8 +51,8 @@ public class TransactionController {
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ){
         String jwtToken = authorizationHeader.substring(7);
-        String email = tokenService.getSubjectFromToken(jwtToken);
-        return ResponseEntity.ok(service.findAllByUserEmail(email, page, size, orderBy, direction));
+        Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
+        return ResponseEntity.ok(service.findAllByUserId(id, page, size, orderBy, direction));
     }
 
     @GetMapping("/{id}")
@@ -78,15 +78,5 @@ public class TransactionController {
             return ResponseEntity.ok(service.delete(id));
     }
 
-    @GetMapping("/user/{id}")
-    public ResponseEntity<Page<SearchedTransactionDTO>> findAllByUser(
-            @PathVariable Long id,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "4") int size,
-            @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
-            @RequestParam(value = "direction", defaultValue = "ASC") String direction
-    ){
-        return ResponseEntity.ok(service.findAllByUser(id, page, size, orderBy, direction));
-    }
 }
 

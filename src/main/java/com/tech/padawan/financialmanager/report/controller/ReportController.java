@@ -39,7 +39,7 @@ public class ReportController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDate> finalDate
     ) {
         String jwtToken = authorizationHeader.substring(7);
-        String email = tokenService.getSubjectFromToken(jwtToken);
+        Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
         LocalDateTime effectiveInitialDate = initialDate
                 .map(LocalDate::atStartOfDay)
                 .orElse(DEFAULT_INITIAL_DATE);
@@ -52,15 +52,15 @@ public class ReportController {
             return ResponseEntity.badRequest().build();
         }
 
-        List<SavedMoneyByMonth> report = service.getSavedMoneyByMonth(email, effectiveInitialDate, effectiveFinalDate);
+        List<SavedMoneyByMonth> report = service.getSavedMoneyByMonth(id, effectiveInitialDate, effectiveFinalDate);
         return ResponseEntity.ok(report);
     }
 
     @GetMapping("/transaction-count-per-type")
     public ResponseEntity<List<TransactionCountByTypeDTO>> getMonthlyTransactionCountGroupedByType(@RequestHeader("Authorization") String authorizationHeader){
         String jwtToken = authorizationHeader.substring(7);
-        String email = tokenService.getSubjectFromToken(jwtToken);
-        List<TransactionCountByTypeDTO> report = service.getMonthlyTransactionCountGroupedByType(email);
+        Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
+        List<TransactionCountByTypeDTO> report = service.getMonthlyTransactionCountGroupedByType(id);
         return ResponseEntity.ok(report);
     }
 }
