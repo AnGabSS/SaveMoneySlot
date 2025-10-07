@@ -61,8 +61,11 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<SearchedTransactionDTO> create(@RequestBody @Valid CreateTransactionDTO transactionDTO){
-            Transaction transaction = service.create(transactionDTO);
+    public ResponseEntity<SearchedTransactionDTO> create(@RequestHeader("Authorization") String authorizationHeader,
+                                                         @RequestBody @Valid CreateTransactionDTO transactionDTO){
+            String jwtToken = authorizationHeader.substring(7);
+            Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
+            Transaction transaction = service.create(id, transactionDTO);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(transaction.getId()).toUri();
             return ResponseEntity.created(uri).body(SearchedTransactionDTO.from(transaction));
     }

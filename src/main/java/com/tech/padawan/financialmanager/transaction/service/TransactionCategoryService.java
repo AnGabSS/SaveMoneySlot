@@ -33,14 +33,14 @@ public class TransactionCategoryService implements ITransactionCategoryService{
 
     @Override
     public Page<SearchedTransactionCategoryDTO> findAll(int page, int size, String orderBy, String direction) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+        PageRequest pageRequest = PageRequest.of(page - 1 , size, Sort.Direction.valueOf(direction), orderBy);
         Page<TransactionCategory> list = repository.findAll(pageRequest);
         return list.map(SearchedTransactionCategoryDTO::from);
     }
 
     @Override
     public Page<SearchedTransactionCategoryDTO> findAllByUserId(Long id, int page, int size, String orderBy, String direction) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+        PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
         Page<TransactionCategory> list = repository.findAllByUserId(pageRequest, id);
         return list.map(SearchedTransactionCategoryDTO::from);
     }
@@ -52,8 +52,8 @@ public class TransactionCategoryService implements ITransactionCategoryService{
     }
 
     @Override
-    public TransactionCategory create(CreateTransactionCategoryDTO transactionDTO) {
-        User user = userService.getUserEntityById(transactionDTO.userId());
+    public TransactionCategory create(Long userId, CreateTransactionCategoryDTO transactionDTO) {
+        User user = userService.getUserEntityById(userId);
         TransactionCategory category = TransactionCategory.builder()
                 .name(transactionDTO.name())
                 .type(transactionDTO.type())

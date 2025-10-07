@@ -57,9 +57,9 @@ public class TransactionService implements ITransactionService{
 
     @Transactional
     @Override
-    public Transaction create(CreateTransactionDTO transactionDTO) {
-        User user = userService.getUserEntityById(transactionDTO.userId());
-        TransactionCategory category = categoryService.getEntityById(transactionDTO.categoryId());
+    public Transaction create(Long userId, CreateTransactionDTO transactionDTO) {
+        User user = userService.getUserEntityById(userId);
+        TransactionCategory category = categoryService.getEntityById(transactionDTO.category());
 
         user = balanceService.applyTransaction(user, transactionDTO.value(), category.getType());
 
