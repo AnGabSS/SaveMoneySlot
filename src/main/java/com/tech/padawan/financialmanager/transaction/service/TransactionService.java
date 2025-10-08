@@ -43,9 +43,9 @@ public class TransactionService implements ITransactionService{
 
 
     @Override
-    public Page<SearchedTransactionDTO> findAllByUserId(Long id, int page, int size, String orderBy, String direction) {
+    public Page<SearchedTransactionDTO> findAllByUserId(Long id, String description, int page, int size, String orderBy, String direction) {
         PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<Transaction> list = repository.findAllByUserId(pageRequest, id);
+        Page<Transaction> list = repository.findAllByUserIdAndDescriptionContainingIgnoreCase(pageRequest, id, description);
         return list.map(SearchedTransactionDTO::from);
     }
 

@@ -11,8 +11,10 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    Page<Transaction> findAllByUserId(Pageable pageable, Long userId);
-    Page<Transaction> findAllByUserEmail(Pageable pageable, String email);
-    List<Transaction> findAllByUserIdAndCreatedAtBetween(Long id, LocalDateTime startDate, LocalDateTime endDate);
-
+    Page<Transaction> findAllByUserIdAndDescriptionContainingIgnoreCase(Pageable pageable, Long userId, String description);
+    List<Transaction> findAllByUserIdAndCreatedAtBetween(
+            Long userId,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
 }

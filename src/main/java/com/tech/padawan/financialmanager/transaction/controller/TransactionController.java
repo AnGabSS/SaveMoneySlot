@@ -45,6 +45,7 @@ public class TransactionController {
     @GetMapping
     public ResponseEntity<Page<SearchedTransactionDTO>> findAll(
             @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(value = "search", defaultValue = "") String search,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "4") int size,
             @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
@@ -52,7 +53,7 @@ public class TransactionController {
     ){
         String jwtToken = authorizationHeader.substring(7);
         Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
-        return ResponseEntity.ok(service.findAllByUserId(id, page, size, orderBy, direction));
+        return ResponseEntity.ok(service.findAllByUserId(id, search, page, size, orderBy, direction));
     }
 
     @GetMapping("/{id}")

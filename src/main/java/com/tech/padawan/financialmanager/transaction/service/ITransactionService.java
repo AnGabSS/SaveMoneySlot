@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface ITransactionService {
-    Page<SearchedTransactionDTO> findAllByUserId(Long id, int page, int size, String orderBy, String direction);
+    Page<SearchedTransactionDTO> findAllByUserId(Long id, String search, int page, int size, String orderBy, String direction);
     SearchedTransactionDTO getById(Long id);
     Transaction create(Long userId, CreateTransactionDTO transactionDTO);
     SearchedTransactionDTO update(Long id, UpdateTransactionDTO transactionDTO);
