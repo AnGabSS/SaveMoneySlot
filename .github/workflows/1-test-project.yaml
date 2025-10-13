@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: AnGabSS/SaveMoneySlot-config-server # <-- SUBSTITUA AQUI
-          path: ../SaveMoneySlot-config-server
+          path: SaveMoneySlot-config-server
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
