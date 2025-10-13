@@ -1,11 +1,9 @@
 spring:
-  application:
-    name:
-      SaveMoney$lot
-  config:
-    import: optional:configserver:http://config-server:8888/
-  cloud:
-    config:
-      label: main
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     baseline-on-migrate: true
