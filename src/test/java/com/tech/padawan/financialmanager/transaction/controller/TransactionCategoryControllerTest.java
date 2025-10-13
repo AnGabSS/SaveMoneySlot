@@ -70,11 +70,10 @@ class TransactionCategoryControllerTest {
 
         CreateTransactionCategoryDTO createCategoryDTO = new CreateTransactionCategoryDTO(
                 "Entertainment",
-                TransactionType.EXPENSE,
-                createdUserId
+                TransactionType.EXPENSE
         );
 
-        TransactionCategory categoryCreated = categoryService.create(createCategoryDTO);
+        TransactionCategory categoryCreated = categoryService.create(createdUserId, createCategoryDTO);
         createdCategoryId = categoryCreated.getId();
     }
 
@@ -84,8 +83,7 @@ class TransactionCategoryControllerTest {
     void shouldCreateACategoryAndReturn201Code() throws Exception {
         CreateTransactionCategoryDTO createDTO = new CreateTransactionCategoryDTO(
                 "Food",
-                TransactionType.EXPENSE,
-                createdUserId
+                TransactionType.EXPENSE
         );
 
         mockMvc.perform(post("/transaction/category")

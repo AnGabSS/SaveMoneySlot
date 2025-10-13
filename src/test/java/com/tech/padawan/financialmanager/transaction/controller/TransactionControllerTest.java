@@ -75,11 +75,10 @@ class TransactionControllerTest {
 
         CreateTransactionCategoryDTO createCategoryDTO = new CreateTransactionCategoryDTO(
                 "Games",
-                TransactionType.EXPENSE,
-                createdUserId
+                TransactionType.EXPENSE
         );
 
-        TransactionCategory categoryCreated = categoryService.create(createCategoryDTO);
+        TransactionCategory categoryCreated = categoryService.create(createdUserId, createCategoryDTO);
         createdCategoryId = categoryCreated.getId();
     }
 
@@ -90,7 +89,6 @@ class TransactionControllerTest {
         CreateTransactionDTO createTransactionDTO = new CreateTransactionDTO(
                 BigDecimal.valueOf(200.0),
                 "Game pass",
-                createdUserId,
                 createdCategoryId
         );
 

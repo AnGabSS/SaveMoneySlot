@@ -1,13 +1,11 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_DB:SaveMoneySlot}
-    username: ${DATABASE_NAME}
-    password: ${DATABASE_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+  application:
+    name:
+      SaveMoney$lot
+  config:
+    import: optional:configserver:http://config-server:8888/
+  cloud:
+    config:
+      label: main
   flyway:
     baseline-on-migrate: true
