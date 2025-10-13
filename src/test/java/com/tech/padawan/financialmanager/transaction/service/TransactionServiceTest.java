@@ -73,12 +73,20 @@ class TransactionServiceTest {
     @DisplayName("Should return all transactions paginated")
     void findAll() {
         Page<Transaction> page = new PageImpl<>(List.of(mockTransaction));
-        when(repository.findAll(any(PageRequest.class))).thenReturn(page);
+        when(repository.findAllByUserIdAndDescriptionContainingIgnoreCase(
+                any(PageRequest.class),
+                eq(mockUser.getId()),
+                eq("")
+        )).thenReturn(page);
 
         Page<SearchedTransactionDTO> result = service.findAllByUserId(mockUser.getId(),"",  1, 10, "id", "ASC");
 
         assertEquals(1, result.getTotalElements());
-        verify(repository).findAll(any(PageRequest.class));
+        verify(repository).findAllByUserIdAndDescriptionContainingIgnoreCase(
+                any(PageRequest.class),
+                anyLong(),
+                anyString()
+        );
     }
 
     @Test
