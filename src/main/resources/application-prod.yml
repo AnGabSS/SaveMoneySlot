@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:SaveMoneySlot_TEST}
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:SaveMoneySlot}
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
   jpa:

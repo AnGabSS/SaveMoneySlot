@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: SaveMoney$lot
+  profiles:
+      active: prod
 
 springdoc:
   swagger-ui:
