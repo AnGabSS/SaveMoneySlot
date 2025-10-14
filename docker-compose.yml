@@ -1,66 +1,30 @@
-version: "3.8"
 
 services:
-  db:
-    image: bitnamilegacy/postgresql:15-debian-12
-    container_name: db
-    ports:
-      - "${DATABASE_PORT}:5432"
-    environment:
-      - POSTGRES_USER=${DATABASE_USER}
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - POSTGRES_DB=${DATABASE_NAME}
-    volumes:
-      - postgres_data:/bitnami/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  config-server:
-    build:
-      context: ../SaveMoneySlot-config-server
-      dockerfile: Dockerfile
-    container_name: config-server
-    ports:
-      - "8888:8888"
-    environment:
-      - SERVER_PORT=8888
-      - GIT_KEY=${GIT_KEY}
-      - SPRING_PROFILES_ACTIVE=prod
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  main-application:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    container_name: application
+  app:
+    build: .
+    container_name: java-app
     ports:
       - "8080:8080"
+    command: ["java", "-jar", "app.jar"]
     environment:
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-      - SPRING_PROFILES_ACTIVE=prod
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_PORT=5432
-      - DATABASE_NAME=${DATABASE_NAME}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-    depends_on:
-      config-server:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-    restart: unless-stopped
+      DATABASE_HOST: db
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_DB: ${DATABASE_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_ISSUER: ${JWT_ISSUER}
+
+  db:
+    image: bitnami/postgresql:latest
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - postgres_data:/bitnami/postgresql
 
 volumes:
   postgres_data:
-    driver: local
-
