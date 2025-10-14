@@ -2,6 +2,7 @@ package com.tech.padawan.financialmanager.user.service;
 
 import com.tech.padawan.financialmanager.role.model.Role;
 import com.tech.padawan.financialmanager.role.model.RoleType;
+import com.tech.padawan.financialmanager.role.repository.RoleRepository;
 import com.tech.padawan.financialmanager.user.dto.CreateUserDTO;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -25,6 +27,8 @@ class UserServiceUnitTest {
 
     @Mock
     private UserRepository repository;
+    @Mock
+    private RoleRepository roleRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -50,7 +54,9 @@ class UserServiceUnitTest {
         );
 
         String encodedPassword = "encodedPassword123";
+        Role userRole = new Role(1L, RoleType.ADMIN);
         when(passwordEncoder.encode("david123456")).thenReturn(encodedPassword);
+        when(roleRepository.findByName(RoleType.ADMIN)).thenReturn(Optional.of(userRole));
 
         User expectedUser = User.builder()
                 .name("David Bowie")

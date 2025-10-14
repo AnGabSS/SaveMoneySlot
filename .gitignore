@@ -7,7 +7,6 @@ build/
 
 /.env
 
-/.env-test
 
 ### STS ###
 .apt_generated
