@@ -12,6 +12,7 @@ import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundExc
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +39,7 @@ public class TransactionCategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SearchedTransactionCategoryDTO>> findAll(
+    public ResponseEntity<Page<SearchedTransactionCategoryDTO>> findAll(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "4") int size,
@@ -46,8 +47,8 @@ public class TransactionCategoryController {
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ) {
         String jwtToken = authorizationHeader.substring(7);
-        String email = tokenService.getSubjectFromToken(jwtToken);
-        return ResponseEntity.ok(service.findAllByUserEmail(email, page, size, orderBy, direction).getContent());
+        Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
+        return ResponseEntity.ok(service.findAllByUserId(id, page, size, orderBy, direction));
     }
 
     @GetMapping("/{id}")
@@ -57,8 +58,11 @@ public class TransactionCategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<SearchedTransactionCategoryDTO> create(@RequestBody @Valid CreateTransactionCategoryDTO categoryDTO) {
-            TransactionCategory category = service.create(categoryDTO);
+    public ResponseEntity<SearchedTransactionCategoryDTO> create(@RequestHeader("Authorization") String authorizationHeader,
+                                                                 @RequestBody @Valid CreateTransactionCategoryDTO categoryDTO) {
+            String jwtToken = authorizationHeader.substring(7);
+            Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
+            TransactionCategory category = service.create(id, categoryDTO);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(category.getId()).toUri();
             return ResponseEntity.created(uri).body(SearchedTransactionCategoryDTO.from(category));
     }
@@ -73,16 +77,5 @@ public class TransactionCategoryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
             return ResponseEntity.ok(service.delete(id));
-    }
-
-    @GetMapping("/user/{id}")
-    public ResponseEntity<List<SearchedTransactionCategoryDTO>> findAllByUser(
-            @PathVariable Long id,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "4") int size,
-            @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
-            @RequestParam(value = "direction", defaultValue = "ASC") String direction
-    ) {
-        return ResponseEntity.ok(service.findAllByUser(id, page, size, orderBy, direction).getContent());
     }
 }

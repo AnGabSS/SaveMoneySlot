@@ -43,9 +43,9 @@ public class TransactionService implements ITransactionService{
 
 
     @Override
-    public Page<SearchedTransactionDTO> findAllByUserEmail(String email, int page, int size, String orderBy, String direction) {
+    public Page<SearchedTransactionDTO> findAllByUserId(Long id, String description, int page, int size, String orderBy, String direction) {
         PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<Transaction> list = repository.findAllByUserEmail(pageRequest, email);
+        Page<Transaction> list = repository.findAllByUserIdAndDescriptionContainingIgnoreCase(pageRequest, id, description);
         return list.map(SearchedTransactionDTO::from);
     }
 
@@ -57,9 +57,9 @@ public class TransactionService implements ITransactionService{
 
     @Transactional
     @Override
-    public Transaction create(CreateTransactionDTO transactionDTO) {
-        User user = userService.getUserEntityById(transactionDTO.userId());
-        TransactionCategory category = categoryService.getEntityById(transactionDTO.categoryId());
+    public Transaction create(Long userId, CreateTransactionDTO transactionDTO) {
+        User user = userService.getUserEntityById(userId);
+        TransactionCategory category = categoryService.getEntityById(transactionDTO.category());
 
         user = balanceService.applyTransaction(user, transactionDTO.value(), category.getType());
 
@@ -108,15 +108,8 @@ public class TransactionService implements ITransactionService{
     }
 
     @Override
-    public Page<SearchedTransactionDTO> findAllByUser(long userid, int page, int size, String orderBy, String direction) {
-        PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<Transaction> list = repository.findAllByUserId(pageRequest, userid);
-        return list.map(SearchedTransactionDTO::from);
-    }
-
-    @Override
-    public List<Transaction> findAllByUserEmailAndMonth(String email, LocalDateTime initialDate, LocalDateTime finalDate) {
-        return repository.findAllByUserEmailAndCreatedAtBetween(email, initialDate, finalDate);
+    public List<Transaction> findAllByUserIdAndMonth(Long id, LocalDateTime initialDate, LocalDateTime finalDate) {
+        return repository.findAllByUserIdAndCreatedAtBetween(id, initialDate, finalDate);
     }
 
 }

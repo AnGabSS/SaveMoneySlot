@@ -59,9 +59,12 @@ jobs:
 
       - name: Run tests
         env:
-          SECRET_KEY: testing
-          DATABASE_NAME: test
-          DATABASE_PASSWORD: test123
-          DATABASE_DB: SaveMoneySlot_TEST
-          JWT_ISSUER: test
+          DATABASE_NAME: SaveMoneySlot_TEST
+          DATABASE_PASSWORD: root
+          DATABASE_USER: postgres
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          JWT_SECRET_KEY: teste
+          JWT_ISSUER: nteste
+          FRONT_URL: http://localhost:4200
         run: ./gradlew test

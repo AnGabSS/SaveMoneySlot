@@ -32,7 +32,7 @@ public class JwtTokenService {
                     .withIssuer(ISSUER)
                     .withIssuedAt(creationDate())
                     .withExpiresAt(expirationDate())
-                    .withSubject(user.getEmail())
+                    .withSubject(user.getId().toString())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
             throw new JWTCreationException("Error generating token.", exception);

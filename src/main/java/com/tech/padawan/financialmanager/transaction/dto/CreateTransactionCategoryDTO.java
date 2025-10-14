@@ -8,9 +8,6 @@ public record CreateTransactionCategoryDTO(
         @NotNull(message = "Name is required")
         String name,
         @NotNull(message = "Type is required")
-        TransactionType type,
-        @NotNull(message = "UserId is required")
-        @Min(value = 0, message = "UserId cannot be a negative number")
-        Long userId
+        TransactionType type
 ) {
 }

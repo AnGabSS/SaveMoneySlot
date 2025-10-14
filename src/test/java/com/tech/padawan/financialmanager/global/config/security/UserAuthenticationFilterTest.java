@@ -82,21 +82,26 @@ class UserAuthenticationFilterTest {
     @DisplayName("Should authenticate user with valid token")
     void shouldAuthenticateUserWithValidToken() throws Exception {
         String token = "valid.jwt.token";
-        String email = "altair@assassins.com";
+        Long id = 1L;
+        String idString = Long.toString(id);
+        String email = "altair@ac.com";
+
+
 
         when(request.getMethod()).thenReturn("GET");
         when(request.getServletPath()).thenReturn("/transaction/category");
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(jwtTokenService.getSubjectFromToken(token)).thenReturn(email);
+        when(jwtTokenService.getSubjectFromToken(token)).thenReturn(idString);
 
         User user = User.builder()
+                .id(id)
                 .name("Altair")
                 .email(email)
                 .password("password")
                 .birthdate(LocalDate.parse("1950-12-12"))
                 .roles(List.of(new Role(1L, RoleType.ADMIN)))
                 .build();
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -128,14 +133,14 @@ class UserAuthenticationFilterTest {
     @DisplayName("Should return 401 when user not found")
     void shouldReturn401WhenUserNotFound() throws Exception {
         String token = "valid.jwt.token";
-        String email = "unknown@assassins.com";
+        String id = "1";
 
         when(request.getMethod()).thenReturn("GET");
         when(request.getServletPath()).thenReturn("/transaction/category");
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(jwtTokenService.getSubjectFromToken(token)).thenReturn(email);
+        when(jwtTokenService.getSubjectFromToken(token)).thenReturn(id);
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userRepository.findById(Long.parseLong(id))).thenReturn(Optional.empty());
 
         StringWriter responseWriter = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(responseWriter));

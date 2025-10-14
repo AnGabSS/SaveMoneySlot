@@ -15,9 +15,6 @@ public record CreateTransactionDTO(
         BigDecimal value,
         String description,
         @NotNull(message = "Category is required")
-        Long categoryId,
-        @NotNull(message = "UserId is required")
-        @Min(value = 0, message = "UserId cannot be a negative number")
-        Long userId
+        Long category
 ) {
 }

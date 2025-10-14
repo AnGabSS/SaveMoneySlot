@@ -2,13 +2,9 @@ server:
   port: 8080
 spring:
   application:
-    name:
-      SaveMoney$lot
-  config:
-    import: optional:configserver:http://config-server:8888/
-  cloud:
-    config:
-      label: main
+    name: SaveMoney$lot
+  profiles:
+      active: prod
 
 springdoc:
   swagger-ui:
@@ -17,5 +13,3 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
-
-

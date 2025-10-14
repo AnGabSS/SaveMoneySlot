@@ -43,8 +43,8 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
                     throw new RuntimeException("Missing token");
                 }
 
-                String email = jwtTokenService.getSubjectFromToken(token);
-                User user = userRepository.findByEmail(email)
+                Long id = Long.parseLong(jwtTokenService.getSubjectFromToken(token));
+                User user = userRepository.findById(id)
                         .orElseThrow(() -> new RuntimeException("User not found"));
 
                 Authentication authentication = new UsernamePasswordAuthenticationToken(

@@ -73,12 +73,20 @@ class TransactionServiceTest {
     @DisplayName("Should return all transactions paginated")
     void findAll() {
         Page<Transaction> page = new PageImpl<>(List.of(mockTransaction));
-        when(repository.findAll(any(PageRequest.class))).thenReturn(page);
+        when(repository.findAllByUserIdAndDescriptionContainingIgnoreCase(
+                any(PageRequest.class),
+                eq(mockUser.getId()),
+                eq("")
+        )).thenReturn(page);
 
-        Page<SearchedTransactionDTO> result = service.findAllByUserEmail(mockUser.getEmail(), 1, 10, "id", "ASC");
+        Page<SearchedTransactionDTO> result = service.findAllByUserId(mockUser.getId(),"",  1, 10, "id", "ASC");
 
         assertEquals(1, result.getTotalElements());
-        verify(repository).findAll(any(PageRequest.class));
+        verify(repository).findAllByUserIdAndDescriptionContainingIgnoreCase(
+                any(PageRequest.class),
+                anyLong(),
+                anyString()
+        );
     }
 
     @Test
@@ -108,7 +116,6 @@ class TransactionServiceTest {
         CreateTransactionDTO dto = new CreateTransactionDTO(
                 value,
                 "Descrição",
-                mockUser.getId(),
                 mockIncomeCategory.getId()
         );
 
@@ -117,7 +124,7 @@ class TransactionServiceTest {
         when(balanceService.applyTransaction(mockUser, value, TransactionType.INCOME)).thenReturn(mockUser);
         when(repository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Transaction result = service.create(dto);
+        Transaction result = service.create(mockUser.getId(), dto);
 
         assertEquals(value, result.getValue());
         assertEquals("Descrição", result.getDescription());
@@ -162,15 +169,4 @@ class TransactionServiceTest {
         verify(repository).deleteById(1L);
     }
 
-    @Test
-    @DisplayName("Should return transactions by user ID paginated")
-    void findAllByUser() {
-        Page<Transaction> page = new PageImpl<>(List.of(mockTransaction));
-        when(repository.findAllByUserId(any(Pageable.class), eq(1L))).thenReturn(page);
-
-        Page<SearchedTransactionDTO> result = service.findAllByUser(1L, 1, 10, "id", "ASC");
-
-        assertEquals(1, result.getTotalElements());
-        verify(repository).findAllByUserId(any(Pageable.class), eq(1L));
-    }
 }
