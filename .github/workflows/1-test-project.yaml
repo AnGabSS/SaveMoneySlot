@@ -16,10 +16,7 @@ jobs:
       - name: Stop and remove all containers and volumes
         run: |
           docker compose down -v --remove-orphans
-          docker stop $(docker ps -a -q)
-          docker rm $(docker ps -a -q)
-          docker rmi -f $(docker images -a -q)
-          docker system prune --all --volumes
+          docker system prune -a -f --volumes
       
 
       - name: Start services via Docker Compose
