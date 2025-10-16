@@ -4,6 +4,6 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
-    baseline-on-migrate: false
+    baseline-on-migrate: true
     clean-disabled: false
     clean-on-validation-error: true
