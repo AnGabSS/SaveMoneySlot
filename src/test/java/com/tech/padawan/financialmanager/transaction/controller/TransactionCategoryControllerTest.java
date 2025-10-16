@@ -33,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
-// Esta anotação ainda é muito útil para garantir que o BD esteja limpo para a PRÓXIMA classe de teste
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class TransactionCategoryControllerTest {
 
@@ -87,67 +86,66 @@ class TransactionCategoryControllerTest {
     }
 
     @Test
-    @DisplayName("Deve criar uma categoria e retornar código 201")
+    @DisplayName("Create a category and return 201 code")
     void shouldCreateACategoryAndReturn201Code() throws Exception {
-        CreateTransactionCategoryDTO createDTO = new CreateTransactionCategoryDTO("Alimentação", TransactionType.EXPENSE);
+        CreateTransactionCategoryDTO createDTO = new CreateTransactionCategoryDTO("Food", TransactionType.EXPENSE);
 
-        mockMvc.perform(post("/transaction/category")
+        mockMvc.perform(post("/api/v1/transaction/category")
                         .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Alimentação"))
+                .andExpect(jsonPath("$.name").value("Food"))
                 .andExpect(jsonPath("$.type").value("EXPENSE"));
     }
 
     @Test
-    @DisplayName("Deve retornar uma página de categorias para o usuário")
-    void shouldReturnAPageOfCategoriesList() throws Exception {
-        // ARRANGE (Preparação): Crie os dados específicos para este teste
-        categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Lazer", TransactionType.EXPENSE));
-        categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Salário", TransactionType.INCOME));
+    @DisplayName("Return a page of categories")
+    void shouldReturnAPageOfCategories() throws Exception {
+        categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Leisure", TransactionType.EXPENSE));
+        categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Salary", TransactionType.INCOME));
 
-        mockMvc.perform(get("/transaction/category?page=1&size=10")
+        mockMvc.perform(get("/api/v1/transaction/category?page=1&size=10")
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("Lazer", "Salário")));
+                .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("Leisure", "Salary")));
     }
 
     @Test
-    @DisplayName("Deve retornar uma categoria pelo seu ID")
-    void shouldReturnACategoryByTheID() throws Exception {
-        TransactionCategory category = categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Saúde", TransactionType.EXPENSE));
+    @DisplayName("Return a category by its ID")
+    void shouldReturnACategoryByItsID() throws Exception {
+        TransactionCategory category = categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Health", TransactionType.EXPENSE));
 
-        mockMvc.perform(get("/transaction/category/" + category.getId())
+        mockMvc.perform(get("/api/v1/transaction/category/" + category.getId())
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(category.getId()))
-                .andExpect(jsonPath("$.name").value("Saúde"));
+                .andExpect(jsonPath("$.name").value("Health"));
     }
 
     @Test
-    @DisplayName("Deve atualizar uma categoria e retornar código 200")
+    @DisplayName("Update a category and return 200 code")
     void shouldUpdateACategoryAndReturn200Code() throws Exception {
-        TransactionCategory originalCategory = categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Lazer", TransactionType.EXPENSE));
+        TransactionCategory originalCategory = categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Leisure", TransactionType.EXPENSE));
 
-        UpdateTransactionCategoryDTO updateDTO = new UpdateTransactionCategoryDTO("Lazer Atualizado", TransactionType.EXPENSE);
+        UpdateTransactionCategoryDTO updateDTO = new UpdateTransactionCategoryDTO("Updated Leisure", TransactionType.EXPENSE);
 
-        mockMvc.perform(put("/transaction/category/" + originalCategory.getId())
+        mockMvc.perform(put("/api/v1/transaction/category/" + originalCategory.getId())
                         .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(originalCategory.getId()))
-                .andExpect(jsonPath("$.name").value("Lazer Atualizado"));
+                .andExpect(jsonPath("$.name").value("Updated Leisure"));
     }
 
     @Test
-    @DisplayName("Deve deletar uma categoria e retornar código 200")
+    @DisplayName("Delete a category and return 200 code")
     void shouldDeleteACategoryAndReturn200Code() throws Exception {
-        TransactionCategory categoryToDelete = categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Temporário", TransactionType.EXPENSE));
+        TransactionCategory categoryToDelete = categoryService.create(createdUserId, new CreateTransactionCategoryDTO("Temporary", TransactionType.EXPENSE));
 
-        mockMvc.perform(delete("/transaction/category/" + categoryToDelete.getId())
+        mockMvc.perform(delete("/api/v1/transaction/category/" + categoryToDelete.getId())
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Transaction category deleted"));

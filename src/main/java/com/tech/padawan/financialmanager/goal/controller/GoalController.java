@@ -19,7 +19,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/goals")
+@RequestMapping("/api/v1/goals")
 @Tag(
         name = "Goals",
         description = "Goals that the user has, and how much they need to save to achieve each goal."

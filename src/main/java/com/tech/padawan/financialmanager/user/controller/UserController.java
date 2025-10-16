@@ -3,15 +3,14 @@ package com.tech.padawan.financialmanager.user.controller;
 import com.tech.padawan.financialmanager.user.dto.*;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.service.IUserService;
-import com.tech.padawan.financialmanager.user.service.UserService;
-import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,16 +22,17 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @Tag(
         name = "Users"
 )
 public class UserController {
 
-    private final IUserService service;
+    private final IUserService _service;
+    private static final Logger _logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(IUserService service){
-        this.service = service;
+        this._service = service;
     }
 
     @Operation(summary = "Get User page ", responses = {
@@ -44,7 +44,10 @@ public class UserController {
             @RequestParam(value = "size", defaultValue = "4") int size,
             @RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction){
-        return ResponseEntity.ok().body(service.listAll(page, size, orderBy, direction));
+        if (page >= 0){
+            _logger.warn("Page number must to be greater than 0");
+        }
+        return ResponseEntity.ok().body(_service.listAll(page, size, orderBy, direction));
     }
 
     @Operation(summary = "Get a user by ID", responses = {
@@ -53,7 +56,7 @@ public class UserController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<UserSearchedDTO> findById(@PathVariable Long id){
-        return ResponseEntity.ok().body(service.getById(id));
+        return ResponseEntity.ok().body(_service.getById(id));
     }
 
     @Operation(summary = "Register a new user",  responses = {
@@ -61,24 +64,10 @@ public class UserController {
     })
     @PostMapping
     public ResponseEntity<UserSearchedDTO> save(@RequestBody @Valid CreateUserDTO user){
-        User userCreated = service.create(user);
+        User userCreated = _service.create(user);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(userCreated.getId()).toUri();
         UserSearchedDTO userDTO = UserSearchedDTO.from(userCreated);
         return ResponseEntity.created(uri).body(userDTO);
-    }
-
-    @Operation(summary = "Login", responses = {
-            @ApiResponse(responseCode = "200", description = "User authenticated", content = @Content(schema = @Schema(implementation = RecoveryJwtTokenDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Email or password is incorrect")
-    })
-    @PostMapping("/login")
-    public ResponseEntity<Object> authenticateUser(@RequestBody LoginUserDTO user){
-        try{
-            RecoveryJwtTokenDTO token = service.authenticateUser(user);
-            return ResponseEntity.ok(token);
-        } catch (BadCredentialsException | InternalAuthenticationServiceException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email or password is incorrect");
-        }
     }
 
     @Operation(summary = "Update a user", responses = {
@@ -87,7 +76,7 @@ public class UserController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<UserSearchedDTO> update(@PathVariable Long id, @RequestBody UpdateUserDTO user){
-        User userCreated = service.update(id, user);
+        User userCreated = _service.update(id, user);
         UserSearchedDTO userDTO = UserSearchedDTO.from(userCreated);
         return ResponseEntity.ok(userDTO);
     }
@@ -98,7 +87,7 @@ public class UserController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id){
-        return ResponseEntity.ok(service.delete(id));
+        return ResponseEntity.ok(_service.delete(id));
     }
 
 }

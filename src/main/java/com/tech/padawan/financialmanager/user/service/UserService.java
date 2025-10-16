@@ -8,6 +8,8 @@ import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,6 +32,7 @@ public class UserService implements IUserService{
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Override
     public Page<UserSearchedDTO> listAll(Integer page, Integer size, String orderBy, String direction) {
@@ -59,6 +62,9 @@ public class UserService implements IUserService{
         String email = authentication.getName();
 
         User user = this.getByEmail(email);
+
+        String successMessage = String.format("User %s logged in successfully", user.getName());
+        logger.info(successMessage);
 
         return new RecoveryJwtTokenDTO(jwtTokenService.generateToken(user));
     }

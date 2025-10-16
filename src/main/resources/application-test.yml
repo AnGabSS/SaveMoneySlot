@@ -1,21 +1,9 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:SaveMoneySlot_TEST}
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
-    baseline-on-migrate: true
+    baseline-on-migrate: false
     clean-disabled: false
     clean-on-validation-error: true
-
-save-money-slot:
-  secret_key: ${JWT_SECRET_KEY}
-  jwt_issuer: ${JWT_ISSUER}
-  front_url: ${FRONT_URL}

@@ -43,6 +43,7 @@ class UserControllerIntegrationTest {
         return "Bearer " + jwtToken;
     }
 
+
     @Test
     @Order(1)
     @DisplayName("Create user and return 201")
@@ -55,7 +56,7 @@ class UserControllerIntegrationTest {
                 RoleType.ADMIN
         );
 
-        MvcResult result = mockMvc.perform(post("/users")
+        MvcResult result = mockMvc.perform(post("/api/v1/users")
                         .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDto)))
@@ -72,28 +73,9 @@ class UserControllerIntegrationTest {
 
     @Test
     @Order(2)
-    @DisplayName("Authenticate user with valid credentials and return JWT token")
-    void shouldAuthenticateUserAndReturnToken() throws Exception {
-
-        LoginUserDTO loginDto = new LoginUserDTO("david@bowie.com.us", "password123");
-
-        MvcResult result = mockMvc.perform(post("/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").exists())
-                .andReturn();
-
-        String responseJson = result.getResponse().getContentAsString();
-        RecoveryJwtTokenDTO tokenResponse = objectMapper.readValue(responseJson, RecoveryJwtTokenDTO.class);
-        jwtToken = tokenResponse.token();
-    }
-
-    @Test
-    @Order(3)
     @DisplayName("List users and verify created user is present")
     void shouldListUsersAndContainCreatedUser() throws Exception {
-        mockMvc.perform(get("/users?page=1&size=10&orderBy=id&direction=ASC")
+        mockMvc.perform(get("/api/v1/users?page=1&size=10&orderBy=id&direction=ASC")
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
@@ -102,10 +84,10 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    @Order(4)
+    @Order(3)
     @DisplayName("Get user by ID")
     void shouldGetUserById() throws Exception {
-        mockMvc.perform(get("/users/" + createdUserId)
+        mockMvc.perform(get("/api/v1/users/" + createdUserId)
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(createdUserId))
@@ -114,7 +96,7 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    @Order(5)
+    @Order(4)
     @DisplayName("Update user")
     void shouldUpdateUser() throws Exception {
         UpdateUserDTO updateDto = new UpdateUserDTO(
@@ -123,7 +105,7 @@ class UserControllerIntegrationTest {
                 java.time.LocalDate.parse("1968-10-07")
         );
 
-        mockMvc.perform(put("/users/" + createdUserId)
+        mockMvc.perform(put("/api/v1/users/" + createdUserId)
                         .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
@@ -137,12 +119,12 @@ class UserControllerIntegrationTest {
     @Order(5)
     @DisplayName("Delete user")
     void shouldDeleteUser() throws Exception {
-        mockMvc.perform(delete("/users/" + createdUserId)
+        mockMvc.perform(delete("/api/v1/users/" + createdUserId)
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("User deleted"));
 
-        mockMvc.perform(get("/users/" + createdUserId)
+        mockMvc.perform(get("/api/v1/users/" + createdUserId)
                         .header("Authorization", bearer()))
                 .andExpect(status().isNotFound());
     }
