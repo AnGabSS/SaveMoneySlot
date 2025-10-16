@@ -7,3 +7,4 @@ spring:
     baseline-on-migrate: true
     clean-disabled: false
     clean-on-validation-error: true
+    clean-before-migrate: true

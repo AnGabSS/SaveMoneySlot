@@ -37,6 +37,14 @@ jobs:
       - name: Print environment variables from Postgres container
         run: docker exec db env
 
+      - name: Clean Database Schema
+        run: |
+          echo "Cleaning database schema before tests..."
+          docker exec -e PGPASSWORD=$DATABASE_PASSWORD db \
+            psql -U $DATABASE_USER -d $DATABASE_NAME \
+            -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+          echo "Schema cleaned successfully."
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
