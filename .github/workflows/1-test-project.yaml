@@ -1,11 +1,11 @@
 name: Java CI with Docker Compose Postgres
+
 on: push
 
 jobs:
   build-run:
     runs-on: ubuntu-latest
 
-    # --- MUDANÇA: Centralize todas as variáveis de ambiente aqui ---
     env:
       DATABASE_NAME: SaveMoneySlot_TEST
       DATABASE_USER: postgres
@@ -19,19 +19,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # --- MUDANÇA: Etapas removidas que causavam inconsistência ---
-      # Não precisamos mais copiar .env-test, pois as variáveis estão definidas acima
-
       - name: Stop and remove all containers and volumes
         run: |
           docker compose down -v --remove-orphans
           docker system prune -f --volumes
 
-      # --- MUDANÇA: Inicia o Docker Compose usando as variáveis do job ---
       - name: Start services via Docker Compose
         run: docker compose up -d --build
 
-      # --- MUDANÇA: O script de espera agora usa as variáveis do job ---
       - name: Wait for Postgres to be ready
         run: |
           echo "Waiting for database..."
@@ -64,5 +59,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
+      - name: Run database migrations
+        run: ./gradlew flywayMigrate
+
       - name: Run tests
         run: ./gradlew test
+
