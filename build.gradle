@@ -62,7 +62,7 @@ test{
 	finalizedBy jacocoTestReport
 	testLogging {
 		events "failed", "skipped"
-		exceptionFormat "full"
+		exceptionFormat = "full"
 		showStandardStreams = true
 	}
 

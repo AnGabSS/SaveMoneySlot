@@ -1,39 +1,46 @@
 name: Java CI with Docker Compose Postgres
-
 on: push
 
 jobs:
   build-run:
     runs-on: ubuntu-latest
 
+    # --- MUDANÇA: Centralize todas as variáveis de ambiente aqui ---
+    env:
+      DATABASE_NAME: SaveMoneySlot_TEST
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: root
+      DATABASE_PORT: 5432
+      JWT_SECRET_KEY: teste
+      JWT_ISSUER: nteste
+      FRONT_URL: http://localhost:4200
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Copy .env-test to .env
-        run: cp .env-test .env
+      # --- MUDANÇA: Etapas removidas que causavam inconsistência ---
+      # Não precisamos mais copiar .env-test, pois as variáveis estão definidas acima
 
       - name: Stop and remove all containers and volumes
         run: |
           docker compose down -v --remove-orphans
           docker system prune -f --volumes
-      
 
+      # --- MUDANÇA: Inicia o Docker Compose usando as variáveis do job ---
       - name: Start services via Docker Compose
-        run: docker compose --env-file .env-test up -d --build
+        run: docker compose up -d --build
 
+      # --- MUDANÇA: O script de espera agora usa as variáveis do job ---
       - name: Wait for Postgres to be ready
-        env:
-          POSTGRES_USER: test
-          POSTGRES_DB: test
         run: |
           echo "Waiting for database..."
-          # obtém o container do postgres (ajuste "postgres" se seu serviço tiver outro nome)
-          POSTGRES_CONTAINER=$(docker ps -qf "name=postgres")
-          until docker exec db pg_isready -U $POSTGRES_USER -d $POSTGRES_DB; do
+          # Este loop agora usa as variáveis corretas ($DATABASE_USER, $DATABASE_NAME)
+          until docker exec db pg_isready -U $DATABASE_USER -d $DATABASE_NAME; do
             echo "Waiting for Postgres..."
             sleep 2
           done
+          echo "Database is ready!"
 
       - name: Print environment variables from Postgres container
         run: docker exec db env
@@ -58,13 +65,4 @@ jobs:
             ${{ runner.os }}-gradle
 
       - name: Run tests
-        env:
-          DATABASE_NAME: SaveMoneySlot_TEST
-          DATABASE_PASSWORD: root
-          DATABASE_USER: postgres
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-          JWT_SECRET_KEY: teste
-          JWT_ISSUER: nteste
-          FRONT_URL: http://localhost:4200
         run: ./gradlew test
