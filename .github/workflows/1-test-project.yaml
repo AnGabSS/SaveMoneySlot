@@ -38,15 +38,16 @@ jobs:
 
       - name: Clean Database Schema
         env:
-          DATABASE_NAME: SaveMoneySlot_TEST
-          DATABASE_PASSWORD: root
-          DATABASE_USER: postgres
+          DATABASE_NAME: $DATABASE_NAME
+          DATABASE_PASSWORD: $DATABASE_PASSWORD
+          DATABASE_USER: $DATABASE_USER
         run: |
           echo "Cleaning database schema before tests..."
           docker exec -e PGPASSWORD=$DATABASE_PASSWORD db \
             psql -h localhost -U $DATABASE_USER -d $DATABASE_NAME \
             -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
           echo "Schema cleaned successfully."
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -67,12 +68,12 @@ jobs:
             ${{ runner.os }}-gradle
       - name: Run tests
         env:
-          DATABASE_NAME: SaveMoneySlot_TEST
-          DATABASE_PASSWORD: root
-          DATABASE_USER: postgres
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-          JWT_SECRET_KEY: teste
-          JWT_ISSUER: nteste
-          FRONT_URL: http://localhost:4200
+          DATABASE_NAME: $DATABASE_NAME
+          DATABASE_PASSWORD: $DATABASE_PASSWORD
+          DATABASE_USER: $DATABASE_USER
+          DATABASE_HOST: $DATABASE_HOST
+          DATABASE_PORT: $DATABASE_PORT
+          JWT_SECRET_KEY: $JWT_SECRET_KEY
+          JWT_ISSUER: $JWT_ISSUER
+          FRONT_URL: $FRONT_URL
         run: ./gradlew test

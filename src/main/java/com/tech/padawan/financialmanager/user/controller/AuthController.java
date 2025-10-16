@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 @Tag(
-        name = "User Authentication"
+        name = "User Authentication",
+        description = "Endpoints for user authentication, including login to obtain a JWT token."
 )
 public class AuthController {
 
@@ -30,10 +31,27 @@ public class AuthController {
         this._service = service;
     }
 
-    @Operation(summary = "Auth", responses = {
-            @ApiResponse(responseCode = "200", description = "User authenticated", content = @Content(schema = @Schema(implementation = RecoveryJwtTokenDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Email or password is incorrect")
-    })
+    @Operation(
+            summary = "Authenticate a user",
+            description = "Authenticates a user based on their email and password. If the credentials are valid, it returns a JWT token for authorizing subsequent requests.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Object containing the user's login credentials.",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = LoginUserDTO.class))
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User authenticated successfully.",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = RecoveryJwtTokenDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid credentials. The provided email or password is incorrect.",
+                            content = @Content(mediaType = "text/plain", schema = @Schema(type = "string", example = "Email or password is incorrect"))
+                    )
+            }
+    )
     @PostMapping()
     public ResponseEntity<Object> authenticateUser(@RequestBody LoginUserDTO user){
         try{

@@ -29,7 +29,7 @@ public class GoalService implements IGoalService {
 
     @Override
     public Page<SearchedGoalDTO> findAll(int page, int size, String orderBy, String direction) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+        PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
         Page<Goal> list = repository.findAll(pageRequest);
         return list.map(SearchedGoalDTO::from);
     }
@@ -69,7 +69,7 @@ public class GoalService implements IGoalService {
 
     @Override
     public Page<SearchedGoalDTO> findAllByUserId(Long userId, int page, int size, String orderBy, String direction) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+        PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
         Page<Goal> list = repository.findAllByUserId(pageRequest, userId);
         return list.map(SearchedGoalDTO::from);
     }

@@ -64,7 +64,7 @@ public class TransactionCategoryController {
             @RequestHeader("Authorization") String authorizationHeader,
 
             @Parameter(description = "The page number to retrieve, starting in page number 1.", example = "1")
-            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "page", defaultValue = "1") int page,
 
             @Parameter(description = "The number of results per page.", example = "10")
             @RequestParam(value = "size", defaultValue = "4") int size,
