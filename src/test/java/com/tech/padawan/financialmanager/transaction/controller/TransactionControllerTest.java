@@ -70,7 +70,7 @@ class TransactionControllerTest {
         categoryRepository.deleteAll();
         userRepository.deleteAll();
 
-        User user = userService.create(new CreateUserDTO("Ezio Auditore", "ezio@virenze.com.it", "password123", java.time.LocalDate.now(), RoleType.ADMIN));
+        User user = userService.create(new CreateUserDTO("Ezio Auditore", "phantom of virenze", "ezio@virenze.com.it", "password123", java.time.LocalDate.now(), RoleType.ADMIN));
         this.createdUserId = user.getId();
         this.jwtToken = tokenService.generateToken(user);
 

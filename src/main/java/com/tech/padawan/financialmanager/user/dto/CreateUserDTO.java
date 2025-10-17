@@ -10,6 +10,8 @@ import java.util.Date;
 public record CreateUserDTO(
         @NotBlank(message = "Name is required")
         String name,
+        @NotBlank(message = "Nickname is required")
+        String nickname,
         @NotBlank(message = "Email is required")
         String email,
         @NotBlank(message = "Password is required")

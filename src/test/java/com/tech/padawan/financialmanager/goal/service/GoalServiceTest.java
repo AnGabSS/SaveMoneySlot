@@ -62,7 +62,7 @@ class GoalServiceTest {
         Page<Goal> page = new PageImpl<>(List.of(mockGoal));
         when(repository.findAll(any(PageRequest.class))).thenReturn(page);
 
-        Page<SearchedGoalDTO> result = service.findAll(0, 10, "id", "ASC");
+        Page<SearchedGoalDTO> result = service.findAll(1, 10, "id", "ASC");
 
         assertEquals(1, result.getTotalElements());
         verify(repository, times(1)).findAll(any(PageRequest.class));
@@ -143,7 +143,7 @@ class GoalServiceTest {
         Page<Goal> page = new PageImpl<>(List.of(mockGoal));
         when(repository.findAllByUserId(any(Pageable.class), eq(1L))).thenReturn(page);
 
-        Page<SearchedGoalDTO> result = service.findAllByUserId(1L, 0, 10, "id", "ASC");
+        Page<SearchedGoalDTO> result = service.findAllByUserId(1L, 1, 10, "id", "ASC");
 
         assertEquals(1, result.getTotalElements());
         verify(repository).findAllByUserId(any(Pageable.class), eq(1L));

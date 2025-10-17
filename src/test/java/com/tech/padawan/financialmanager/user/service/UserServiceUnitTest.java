@@ -1,5 +1,8 @@
 package com.tech.padawan.financialmanager.user.service;
 
+import com.tech.padawan.financialmanager.champion.model.Champion;
+import com.tech.padawan.financialmanager.champion.model.ChampionLevel;
+import com.tech.padawan.financialmanager.champion.repository.ChampionRepository;
 import com.tech.padawan.financialmanager.role.model.Role;
 import com.tech.padawan.financialmanager.role.model.RoleType;
 import com.tech.padawan.financialmanager.role.repository.RoleRepository;
@@ -33,6 +36,9 @@ class UserServiceUnitTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private ChampionRepository championRepository;
+
     @InjectMocks
     private UserService service;
 
@@ -47,6 +53,7 @@ class UserServiceUnitTest {
         // Arrange
         CreateUserDTO userDTO = new CreateUserDTO(
                 "David Bowie",
+                "bowie1940",
                 "david@bowie.com.us",
                 "david123456",
                 LocalDate.parse("1940-04-03"),
@@ -67,7 +74,15 @@ class UserServiceUnitTest {
                 .balance(BigDecimal.ZERO)
                 .build();
 
+        Champion champion = Champion.builder()
+                .id(1L)
+                .points(0)
+                .user(expectedUser)
+                .build();
+
+        when(championRepository.save(any(Champion.class))).thenReturn(champion);
         when(repository.save(any(User.class))).thenReturn(expectedUser);
+
 
         // Act
         User createdUser = service.create(userDTO);

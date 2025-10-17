@@ -50,6 +50,7 @@ class UserControllerIntegrationTest {
     void shouldCreateUser() throws Exception {
         CreateUserDTO createDto = new CreateUserDTO(
                 "David Bowie",
+                "the god of rock",
                 "david@bowie.com.us",
                 "password123",
                 java.time.LocalDate.parse("1940-04-03"),

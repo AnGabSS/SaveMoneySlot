@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.user.model;
 
+import com.tech.padawan.financialmanager.champion.model.Champion;
 import com.tech.padawan.financialmanager.role.model.Role;
 import com.tech.padawan.financialmanager.role.model.RoleType;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
@@ -51,10 +52,13 @@ public class User implements UserDetails {
     private List<Role> roles;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Transaction> transactions = new ArrayList<>();
+    private List<Transaction> transactions;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<TransactionCategory> transactionsCategories = new ArrayList<>();
+    private List<TransactionCategory> transactionsCategories;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Champion champion;
 
 
     public Collection<? extends GrantedAuthority> getAuthorities() {

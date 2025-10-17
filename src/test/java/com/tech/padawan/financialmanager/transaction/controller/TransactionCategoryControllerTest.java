@@ -70,6 +70,7 @@ class TransactionCategoryControllerTest {
 
         CreateUserDTO createDto = new CreateUserDTO(
                 "Altair Ibn-La’Ahad",
+                "altair",
                 "altair@assassins.com",
                 "creed123",
                 java.time.LocalDate.parse("1935-07-11"),

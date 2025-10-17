@@ -1,5 +1,7 @@
 package com.tech.padawan.financialmanager.user.service;
 
+import com.tech.padawan.financialmanager.champion.model.Champion;
+import com.tech.padawan.financialmanager.champion.repository.ChampionRepository;
 import com.tech.padawan.financialmanager.global.config.security.JwtTokenService;
 import com.tech.padawan.financialmanager.role.model.Role;
 import com.tech.padawan.financialmanager.role.repository.RoleRepository;
@@ -32,6 +34,8 @@ public class UserService implements IUserService{
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final ChampionRepository championRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Override
@@ -80,7 +84,11 @@ public class UserService implements IUserService{
                 .roles(List.of(userRole))
                 .balance(BigDecimal.ZERO)
                 .build();
-        return repository.save(user);
+
+        User savedUser = repository.save(user);
+        Champion champion = Champion.builder().user(savedUser).nickname(userDTO.nickname()).build();
+        championRepository.save(champion);
+        return savedUser;
     }
 
     @Override
