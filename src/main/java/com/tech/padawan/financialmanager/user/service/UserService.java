@@ -1,5 +1,7 @@
 package com.tech.padawan.financialmanager.user.service;
 
+import com.tech.padawan.financialmanager.champion.model.Champion;
+import com.tech.padawan.financialmanager.champion.repository.ChampionRepository;
 import com.tech.padawan.financialmanager.global.config.security.JwtTokenService;
 import com.tech.padawan.financialmanager.role.model.Role;
 import com.tech.padawan.financialmanager.role.repository.RoleRepository;
@@ -8,6 +10,8 @@ import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,6 +34,9 @@ public class UserService implements IUserService{
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final ChampionRepository championRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Override
     public Page<UserSearchedDTO> listAll(Integer page, Integer size, String orderBy, String direction) {
@@ -60,6 +67,9 @@ public class UserService implements IUserService{
 
         User user = this.getByEmail(email);
 
+        String successMessage = String.format("User %s logged in successfully", user.getName());
+        logger.info(successMessage);
+
         return new RecoveryJwtTokenDTO(jwtTokenService.generateToken(user));
     }
 
@@ -74,7 +84,11 @@ public class UserService implements IUserService{
                 .roles(List.of(userRole))
                 .balance(BigDecimal.ZERO)
                 .build();
-        return repository.save(user);
+
+        User savedUser = repository.save(user);
+        Champion champion = Champion.builder().user(savedUser).nickname(userDTO.nickname()).build();
+        championRepository.save(champion);
+        return savedUser;
     }
 
     @Override

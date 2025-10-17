@@ -66,17 +66,15 @@ class TransactionControllerTest {
 
     @BeforeEach
     void setup() {
-        // Limpeza explícita garante isolamento total antes de cada teste
         transactionRepository.deleteAll();
         categoryRepository.deleteAll();
         userRepository.deleteAll();
 
-        // ARRANGE (Preparação) Comum: Cria um usuário e uma categoria base para os testes
-        User user = userService.create(new CreateUserDTO("Ezio Auditore", "ezio@virenze.com.it", "password123", java.time.LocalDate.now(), RoleType.ADMIN));
+        User user = userService.create(new CreateUserDTO("Ezio Auditore", "phantom of virenze", "ezio@virenze.com.it", "password123", java.time.LocalDate.now(), RoleType.ADMIN));
         this.createdUserId = user.getId();
         this.jwtToken = tokenService.generateToken(user);
 
-        TransactionCategory category = categoryService.create(this.createdUserId, new CreateTransactionCategoryDTO("Jogos", TransactionType.EXPENSE));
+        TransactionCategory category = categoryService.create(this.createdUserId, new CreateTransactionCategoryDTO("Games", TransactionType.EXPENSE));
         this.createdCategoryId = category.getId();
     }
 
@@ -85,28 +83,26 @@ class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("Deve criar uma transação e retornar código 201")
+    @DisplayName("Create a transaction and return 201 code")
     void shouldCreateATransactionAndReturn201Code() throws Exception {
-        // ARRANGE
-        CreateTransactionDTO createDto = new CreateTransactionDTO(BigDecimal.valueOf(200.00), "Compra de Cyberpunk 2077", createdCategoryId);
+        CreateTransactionDTO createDto = new CreateTransactionDTO(BigDecimal.valueOf(200.00), "Cyberpunk 2077", createdCategoryId);
 
-        // ACT & ASSERT
-        mockMvc.perform(post("/transaction")
+        mockMvc.perform(post("/api/v1/transaction")
                         .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.value").value(200.00))
-                .andExpect(jsonPath("$.description").value("Compra de Cyberpunk 2077"));
+                .andExpect(jsonPath("$.description").value("Cyberpunk 2077"));
     }
 
     @Test
-    @DisplayName("Deve retornar uma lista de transações do usuário e código 200")
+    @DisplayName("Return a page of transactions for user and return 200 code")
     void shouldReturnAPageOfTransactionsForUserAndReturn200Code() throws Exception {
         transactionService.create(createdUserId, new CreateTransactionDTO(BigDecimal.valueOf(250.00), "Steam Sale", createdCategoryId));
         transactionService.create(createdUserId, new CreateTransactionDTO(BigDecimal.valueOf(70.00), "DLC Phantom Liberty", createdCategoryId));
 
-        mockMvc.perform(get("/transaction?page=1&size=10")
+        mockMvc.perform(get("/api/v1/transaction?page=1&size=10")
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -114,44 +110,44 @@ class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("Deve retornar uma transação pelo seu ID e código 200")
+    @DisplayName("Return transaction by id and return 200 code")
     void shouldReturnTransactionByIdAndReturn200Code() throws Exception {
-        Transaction transaction = transactionService.create(createdUserId, new CreateTransactionDTO(BigDecimal.valueOf(150.00), "Assinatura Game Pass", createdCategoryId));
-        Long transactionId = transaction.getId(); // ID dinâmico
+        Transaction transaction = transactionService.create(createdUserId, new CreateTransactionDTO(BigDecimal.valueOf(150.00), "Game Pass", createdCategoryId));
+        Long transactionId = transaction.getId();
 
-        mockMvc.perform(get("/transaction/" + transactionId)
+        mockMvc.perform(get("/api/v1/transaction/" + transactionId)
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(transactionId))
-                .andExpect(jsonPath("$.description").value("Assinatura Game Pass"))
+                .andExpect(jsonPath("$.description").value("Game Pass"))
                 .andExpect(jsonPath("$.value").value(150.00));
     }
 
     @Test
-    @DisplayName("Deve atualizar uma transação e retornar código 200")
+    @DisplayName("Update transaction and return 200 code")
     void shouldUpdateTransactionAndReturn200Code() throws Exception {
-        Transaction transaction = transactionService.create(createdUserId, new CreateTransactionDTO(BigDecimal.valueOf(100.00), "Créditos na PSN", createdCategoryId));
-        Long transactionId = transaction.getId(); // ID dinâmico
+        Transaction transaction = transactionService.create(createdUserId, new CreateTransactionDTO(BigDecimal.valueOf(100.00), "PSN Credits", createdCategoryId));
+        Long transactionId = transaction.getId();
 
-        UpdateTransactionDTO updateDto = new UpdateTransactionDTO(BigDecimal.valueOf(120.50), "Créditos na PSN (valor corrigido)", createdCategoryId);
+        UpdateTransactionDTO updateDto = new UpdateTransactionDTO(BigDecimal.valueOf(120.50), "PSN Credits (new value)", createdCategoryId);
 
-        mockMvc.perform(put("/transaction/" + transactionId)
+        mockMvc.perform(put("/api/v1/transaction/" + transactionId)
                         .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(transactionId))
-                .andExpect(jsonPath("$.description").value("Créditos na PSN (valor corrigido)"))
+                .andExpect(jsonPath("$.description").value("PSN Credits (new value)"))
                 .andExpect(jsonPath("$.value").value(120.50));
     }
 
     @Test
-    @DisplayName("Deve deletar uma transação e retornar código 200")
+    @DisplayName("Delete transaction and return 200 code")
     void shouldDeleteTransactionAndReturn200Code() throws Exception {
-        Transaction transaction = transactionService.create(createdUserId, new CreateTransactionDTO(BigDecimal.valueOf(50.00), "Jogo a ser removido", createdCategoryId));
-        Long transactionId = transaction.getId(); // ID dinâmico
+        Transaction transaction = transactionService.create(createdUserId, new CreateTransactionDTO(BigDecimal.valueOf(50.00), "Game to be deleted", createdCategoryId));
+        Long transactionId = transaction.getId();
 
-        mockMvc.perform(delete("/transaction/" + transactionId)
+        mockMvc.perform(delete("/api/v1/transaction/" + transactionId)
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Transaction deleted"));

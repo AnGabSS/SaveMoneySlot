@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.global.config;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.tech.padawan.financialmanager.global.exception.NotFoundException;
 import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(JWTVerificationException.class)
+    public ResponseEntity<Map<String, String>> handleJwtVerificationException(
+            NotFoundException ex
+    ) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", "Not Found");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex){
         Map<String, String> error = new HashMap<>();
@@ -46,10 +57,5 @@ public class GlobalExceptionHandler {
         ex.printStackTrace();
         System.out.println("Error caused by: " + ex.getCause());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<String> handleUserNotFound(UserNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 }

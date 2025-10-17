@@ -10,7 +10,7 @@
 ## 🎯 Funcionalidades | Features
 
 - Rastreamento de despesas e receitas | Expense and income tracking  
-- Criação e controle de orçamentos | Budget creation and control  
+- Criação e controle de Metas | Goals creation and control  
 - Visualização de hábitos de consumo | Spending habit insights  
 - Sistema de autenticação com JWT | JWT authentication system  
 - Migrações de banco com Flyway | Database migrations with Flyway  
@@ -26,10 +26,12 @@
 implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 implementation 'org.springframework.boot:spring-boot-starter-web'
 implementation 'org.springframework.boot:spring-boot-starter-security'
+implementation 'org.springframework.boot:spring-boot-starter-validation'
 implementation 'org.flywaydb:flyway-core'
 implementation 'org.flywaydb:flyway-database-postgresql'
 implementation 'com.auth0:java-jwt:4.5.0'
 implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+implementation 'org.springframework.boot:spring-boot-starter-actuator'
 ```
 
 ### 🛠️ Suporte e Utilitários | Support & Utilities
@@ -52,7 +54,7 @@ testImplementation 'org.springframework.security:spring-security-test'
 
 ### 📊 Cobertura de Testes | Test Coverage
 
-**Cobertura Atual: 82%** \
+**Cobertura Atual: 71%** \
 \
 O projeto utiliza **[JaCoCo](https://www.jacoco.org/jacoco/)** para gerar relatórios de cobertura de testes.
 Você pode visualizar o html pelo caminho:

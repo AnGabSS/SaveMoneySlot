@@ -3,8 +3,20 @@ server:
 spring:
   application:
     name: SaveMoney$lot
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:SaveMoneySlot}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
   profiles:
-      active: prod
+      active: dev
+
 
 springdoc:
   swagger-ui:
@@ -13,3 +25,8 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
+
+save-money-slot:
+  secret_key: ${JWT_SECRET_KEY}
+  jwt_issuer: ${JWT_ISSUER}
+  front_url: ${FRONT_URL}

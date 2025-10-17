@@ -1,7 +1,9 @@
 package com.tech.padawan.financialmanager.global.config.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.tech.padawan.financialmanager.user.model.User;
 import com.tech.padawan.financialmanager.user.repository.UserRepository;
+import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,12 +42,12 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             try {
                 String token = recoveryToken(request);
                 if (token == null || token.isBlank()) {
-                    throw new RuntimeException("Missing token");
+                    throw new JWTVerificationException("Missing token");
                 }
 
                 Long id = Long.parseLong(jwtTokenService.getSubjectFromToken(token));
                 User user = userRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("User not found"));
+                        .orElseThrow(() -> new UserNotFoundException("User not found"));
 
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
