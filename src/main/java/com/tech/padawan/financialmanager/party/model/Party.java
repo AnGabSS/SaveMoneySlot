@@ -48,6 +48,11 @@ public class Party {
 
     @Setter
     @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "parties_champions",
+            joinColumns = @JoinColumn(name = "party_id"),
+            inverseJoinColumns = @JoinColumn(name = "champion_id")
+    )
     @NotNull(message = "Champions is required")
     private List<Champion> champions;
 }

@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public record CreateGoalDTO(
+public record UpdateSpendingLimitGoalDTO(
         @NotBlank(message = "Name is required")
         String name,
         @NotNull(message = "Target Amount is required")
@@ -19,9 +19,6 @@ public record CreateGoalDTO(
         @Nullable
         String reason,
         @Nullable
-        Date deadline,
-        @NotNull(message = "UserId is required")
-        @Min(value = 0, message = "UserId cannot be a negative number")
-        Long userId
+        Date deadline
 ) {
 }
