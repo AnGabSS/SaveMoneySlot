@@ -7,14 +7,13 @@ import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 public interface ITransactionService {
-    Page<SearchedTransactionDTO> findAllByUserId(Long id, String search, int page, int size, String orderBy, String direction);
+    Page<SearchedTransactionDTO> findAllByPartyId(Long id, String search, int page, int size, String orderBy, String direction);
     SearchedTransactionDTO getById(Long id);
-    Transaction create(Long userId, CreateTransactionDTO transactionDTO);
+    Transaction create(CreateTransactionDTO transactionDTO);
     SearchedTransactionDTO update(Long id, UpdateTransactionDTO transactionDTO);
     String delete(Long id);
-    List<Transaction> findAllByUserIdAndMonth(Long id, LocalDateTime initialDate, LocalDateTime finalDate);
+    List<Transaction> findAllByPartyIdAndMonth(Long id, LocalDateTime initialDate, LocalDateTime finalDate);
 }

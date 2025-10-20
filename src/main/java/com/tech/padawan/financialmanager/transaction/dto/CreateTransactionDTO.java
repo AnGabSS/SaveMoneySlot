@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public record CreateTransactionDTO(
+        @NotNull(message = "partyId is required")
+        Long partyId,
         @NotNull(message = "Value is required")
         @Min(value = 0, message = "Value most be a positive number")
         BigDecimal value,

@@ -1,5 +1,7 @@
 package com.tech.padawan.financialmanager.transaction.service;
 
+import com.tech.padawan.financialmanager.party.model.Party;
+import com.tech.padawan.financialmanager.party.service.IPartyService;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
@@ -7,17 +9,15 @@ import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
-import com.tech.padawan.financialmanager.user.model.User;
-import com.tech.padawan.financialmanager.user.service.IUserService;
+import com.tech.padawan.financialmanager.party.model.Party;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,27 +25,27 @@ import java.util.Optional;
 public class TransactionService implements ITransactionService{
 
     private final TransactionRepository repository;
-    private final IUserService userService;
+    private final IPartyService partyService;
     private final ITransactionBalanceService balanceService;
     private final ITransactionCategoryService categoryService;
 
     public TransactionService(
             TransactionRepository repository,
-            IUserService userService,
+            IPartyService partyService,
             ITransactionBalanceService balanceService,
             ITransactionCategoryService categoryService
     ) {
         this.repository = repository;
-        this.userService = userService;
+        this.partyService = partyService;
         this.balanceService = balanceService;
         this.categoryService = categoryService;
     }
 
 
     @Override
-    public Page<SearchedTransactionDTO> findAllByUserId(Long id, String description, int page, int size, String orderBy, String direction) {
+    public Page<SearchedTransactionDTO> findAllByPartyId(Long id, String description, int page, int size, String orderBy, String direction) {
         PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<Transaction> list = repository.findAllByUserIdAndDescriptionContainingIgnoreCase(pageRequest, id, description);
+        Page<Transaction> list = repository.findAllByPartyIdAndDescriptionContainingIgnoreCase(pageRequest, id, description);
         return list.map(SearchedTransactionDTO::from);
     }
 
@@ -57,20 +57,20 @@ public class TransactionService implements ITransactionService{
 
     @Transactional
     @Override
-    public Transaction create(Long userId, CreateTransactionDTO transactionDTO) {
-        User user = userService.getUserEntityById(userId);
+    public Transaction create(CreateTransactionDTO transactionDTO) {
+        Party party = partyService.getById(transactionDTO.partyId());
         TransactionCategory category = categoryService.getEntityById(transactionDTO.category());
 
-        user = balanceService.applyTransaction(user, transactionDTO.value(), category.getType());
+        party = balanceService.applyTransaction(party, transactionDTO.value(), category.getType());
 
-        userService.updateUserCompleted(user);
+        partyService.updateCompleted(party);
 
         Transaction transaction = Transaction.builder()
                 .value(transactionDTO.value())
                 .description(transactionDTO.description())
                 .category(category)
                 .createdAt(LocalDateTime.now())
-                .user(user)
+                .party(party)
                 .build();
 
         return repository.save(transaction);
@@ -81,16 +81,16 @@ public class TransactionService implements ITransactionService{
     public SearchedTransactionDTO update(Long id, UpdateTransactionDTO transactionDTO) {
         Transaction transaction = repository.getReferenceById(id);
 
-        User user = userService.getUserEntityById(transaction.getUser().getId());
+        Party party = partyService.getById(transaction.getParty().getId());
         TransactionCategory category = categoryService.getEntityById(transactionDTO.categoryId());
 
         // Revert the old transaction value
-        user = balanceService.revertTransaction(user, transaction.getValue(), transaction.getCategory().getType());
+        party = balanceService.revertTransaction(party, transaction.getValue(), transaction.getCategory().getType());
 
         //Apply the new transaction value
-        user = balanceService.applyTransaction(user, transactionDTO.value(), category.getType());
+        party = balanceService.applyTransaction(party, transactionDTO.value(), category.getType());
 
-        userService.updateUserCompleted(user);
+        partyService.updateCompleted(party);
 
         transaction.setValue(transactionDTO.value());
         transaction.setDescription(transactionDTO.description());
@@ -108,8 +108,8 @@ public class TransactionService implements ITransactionService{
     }
 
     @Override
-    public List<Transaction> findAllByUserIdAndMonth(Long id, LocalDateTime initialDate, LocalDateTime finalDate) {
-        return repository.findAllByUserIdAndCreatedAtBetween(id, initialDate, finalDate);
+    public List<Transaction> findAllByPartyIdAndMonth(Long id, LocalDateTime initialDate, LocalDateTime finalDate) {
+        return repository.findAllByPartyIdAndCreatedAtBetween(id, initialDate, finalDate);
     }
 
 }

@@ -1,8 +1,8 @@
 package com.tech.padawan.financialmanager.global.config;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.tech.padawan.financialmanager.global.exception.AlreadyExistsException;
 import com.tech.padawan.financialmanager.global.exception.NotFoundException;
-import com.tech.padawan.financialmanager.user.service.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -36,6 +36,16 @@ public class GlobalExceptionHandler {
         body.put("error", "Not Found");
         body.put("message", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidFieldException(
+            AlreadyExistsException ex
+    ) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", "Already exists");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(JWTVerificationException.class)

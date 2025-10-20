@@ -82,7 +82,6 @@ public class UserService implements IUserService{
                 .password(passwordEncoder.encode(userDTO.password()))
                 .birthdate(userDTO.birthdate())
                 .roles(List.of(userRole))
-                .balance(BigDecimal.ZERO)
                 .build();
 
         User savedUser = repository.save(user);

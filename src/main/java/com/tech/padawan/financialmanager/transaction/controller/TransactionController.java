@@ -1,18 +1,10 @@
 package com.tech.padawan.financialmanager.transaction.controller;
 
-import com.tech.padawan.financialmanager.global.config.security.JwtTokenService;
-import com.tech.padawan.financialmanager.global.exception.NotFoundException;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
-import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
-import com.tech.padawan.financialmanager.transaction.service.ITransactionBalanceService;
-import com.tech.padawan.financialmanager.transaction.service.ITransactionCategoryService;
 import com.tech.padawan.financialmanager.transaction.service.ITransactionService;
-import com.tech.padawan.financialmanager.transaction.service.TransactionService;
-import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
-import com.tech.padawan.financialmanager.user.service.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,36 +12,31 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/transaction")
 @Tag(
         name = "Transactions",
-        description = "Transactions carried out by the user, such as buying a game or receiving their salary."
+        description = "Transactions carried out by the party, such as buying a game or receiving their salary."
 )
 public class TransactionController {
 
     private final ITransactionService service;
 
-    private final JwtTokenService tokenService;
 
-    public TransactionController(ITransactionService service, JwtTokenService tokenService) {
+    public TransactionController(ITransactionService service) {
         this.service = service;
-        this.tokenService = tokenService;
     }
 
     @Operation(
-            summary = "Get user's transactions",
-            description = "Retrieves a paginated list of all transactions belonging to the authenticated user. The list can be filtered by a search term.",
+            summary = "Get party transactions",
+            description = "Retrieves a paginated list of all transactions of the party. The list can be filtered by a search term.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -59,10 +46,10 @@ public class TransactionController {
                     @ApiResponse(responseCode = "401", description = "Unauthorized. Token is invalid or missing.", content = @Content)
             }
     )
-    @GetMapping
+    @GetMapping("/{id}")
     public ResponseEntity<Page<SearchedTransactionDTO>> findAll(
-            @Parameter(description = "Authentication JWT token.", required = true)
-            @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(description = "Party id", required = true, example = "1")
+            @PathVariable Long id,
 
             @Parameter(description = "Search term to filter transactions by description.")
             @RequestParam(value = "search", defaultValue = "") String search,
@@ -79,9 +66,7 @@ public class TransactionController {
             @Parameter(description = "The sort direction ('ASC' or 'DESC').")
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ){
-        String jwtToken = authorizationHeader.substring(7);
-        Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
-        return ResponseEntity.ok(service.findAllByUserId(id, search, page, size, orderBy, direction));
+        return ResponseEntity.ok(service.findAllByPartyId(id, search, page, size, orderBy, direction));
     }
 
     @Operation(
@@ -96,7 +81,7 @@ public class TransactionController {
                     @ApiResponse(responseCode = "404", description = "Transaction not found for the provided ID.", content = @Content)
             }
     )
-    @GetMapping("/{id}")
+    @GetMapping("/find-by-id/{id}")
     public ResponseEntity<SearchedTransactionDTO> findById(
             @Parameter(description = "ID of the transaction to be retrieved.", required = true, example = "1") @PathVariable Long id
     ){
@@ -105,7 +90,7 @@ public class TransactionController {
 
     @Operation(
             summary = "Create a new transaction",
-            description = "Creates a new transaction for the authenticated user. The user is identified via the JWT token.",
+            description = "Creates a new transaction for the party.",
             responses = {
                     @ApiResponse(
                             responseCode = "201",
@@ -118,14 +103,9 @@ public class TransactionController {
     )
     @PostMapping
     public ResponseEntity<SearchedTransactionDTO> create(
-            @Parameter(description = "Authentication JWT token.", required = true)
-            @RequestHeader("Authorization") String authorizationHeader,
-
             @RequestBody @Valid CreateTransactionDTO transactionDTO
     ){
-            String jwtToken = authorizationHeader.substring(7);
-            Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
-            Transaction transaction = service.create(id, transactionDTO);
+            Transaction transaction = service.create(transactionDTO);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(transaction.getId()).toUri();
             return ResponseEntity.created(uri).body(SearchedTransactionDTO.from(transaction));
     }

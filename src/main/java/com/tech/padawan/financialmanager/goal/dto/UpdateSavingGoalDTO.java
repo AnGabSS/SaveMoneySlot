@@ -1,24 +1,22 @@
 package com.tech.padawan.financialmanager.goal.dto;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
-public record UpdateGoalDTO(
-        @NotBlank(message = "Name is required")
+public record UpdateSavingGoalDTO(
+
+        @NotBlank(message = "Name cannot be blank")
+        @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
         String name,
-        @NotNull(message = "Target Amount is required")
-        @Min(value = 0, message = "Target cannot be a negative number")
-        BigDecimal targetAmount,
-        @NotNull(message = "Saved Amount is required")
-        BigDecimal savedAmount,
-        @Nullable
         String reason,
-        @Nullable
-        Date deadline
-) {
-}
+        @DecimalMin(value = "0.0", inclusive = false, message = "Target must be greater than zero")
+        BigDecimal targetAmount,
+        @FutureOrPresent(message = "Deadline must be in the present or future")
+        LocalDate deadline
+
+) {}

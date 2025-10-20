@@ -11,9 +11,9 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    Page<Transaction> findAllByUserIdAndDescriptionContainingIgnoreCase(Pageable pageable, Long userId, String description);
-    List<Transaction> findAllByUserIdAndCreatedAtBetween(
-            Long userId,
+    Page<Transaction> findAllByPartyIdAndDescriptionContainingIgnoreCase(Pageable pageable, Long partyId, String description);
+    List<Transaction> findAllByPartyIdAndCreatedAtBetween(
+            Long partyId,
             LocalDateTime startDate,
             LocalDateTime endDate
     );

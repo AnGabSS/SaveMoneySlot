@@ -84,7 +84,7 @@ public class UserController {
                     )
             }
     )
-    @GetMapping("/{id}")
+    @GetMapping("/find-by-id/{id}")
     public ResponseEntity<UserSearchedDTO> findById(
             @Parameter(description = "ID of the user to be retrieved.", required = true, example = "1")
             @PathVariable Long id

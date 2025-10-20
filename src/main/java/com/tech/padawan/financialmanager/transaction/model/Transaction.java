@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.transaction.model;
 
+import com.tech.padawan.financialmanager.party.model.Party;
 import com.tech.padawan.financialmanager.user.model.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -28,6 +29,7 @@ public class Transaction {
     private BigDecimal value;
     @NotBlank(message = "Description is required")
     private String description;
+
     private LocalDateTime createdAt;
 
     @ManyToOne
@@ -35,7 +37,7 @@ public class Transaction {
     private TransactionCategory category;
 
     @ManyToOne
-    @NotNull(message = "User is required")
-    private User user;
+    @NotNull(message = "Party is required")
+    private Party party;
 
 }

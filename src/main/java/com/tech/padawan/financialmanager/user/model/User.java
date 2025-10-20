@@ -42,7 +42,6 @@ public class User implements UserDetails {
     private String password;
     @NotNull(message = "Birthdate is required")
     private LocalDate birthdate;
-    private BigDecimal balance;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name="users_roles",
@@ -51,11 +50,6 @@ public class User implements UserDetails {
     @NotEmpty(message = "Role is required")
     private List<Role> roles;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Transaction> transactions;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<TransactionCategory> transactionsCategories;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Champion champion;

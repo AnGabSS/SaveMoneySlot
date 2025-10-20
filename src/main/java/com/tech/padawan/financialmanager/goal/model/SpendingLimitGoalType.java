@@ -1,4 +1,6 @@
 package com.tech.padawan.financialmanager.goal.model;
 
 public enum SpendingLimitGoalType {
+    PERCENTUAL,
+    AMOUNT
 }

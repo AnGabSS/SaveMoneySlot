@@ -27,7 +27,7 @@ public class ReportService implements IReportService {
 
     @Override
     public List<SavedMoneyByMonth> getSavedMoneyByMonth(Long id, LocalDateTime initialDate, LocalDateTime finalDate) {
-        List<Transaction> transactions = transactionService.findAllByUserIdAndMonth(id, initialDate, finalDate);
+        List<Transaction> transactions = transactionService.findAllByPartyIdAndMonth(id, initialDate, finalDate);
 
         Map<YearMonth, BigDecimal> savedMoneyByMonthMap = transactions.stream()
                 .collect(Collectors.groupingBy(
@@ -59,7 +59,7 @@ public class ReportService implements IReportService {
         LocalDateTime firstDayOfMonth = yearMonth.atDay(1).atStartOfDay();
         LocalDateTime lastDayOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
 
-        List<Transaction> transactions = transactionService.findAllByUserIdAndMonth(id, firstDayOfMonth, lastDayOfMonth);
+        List<Transaction> transactions = transactionService.findAllByPartyIdAndMonth(id, firstDayOfMonth, lastDayOfMonth);
 
         Map<TransactionType, Map<String, BigDecimal>> groupedAmounts = transactions.stream()
                 .collect(Collectors.groupingBy(

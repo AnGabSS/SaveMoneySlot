@@ -1,24 +1,24 @@
 package com.tech.padawan.financialmanager.goal.dto;
 
+import com.tech.padawan.financialmanager.goal.model.RecurrencePeriod;
+import com.tech.padawan.financialmanager.goal.model.SpendingLimitGoalType;
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
 public record UpdateSpendingLimitGoalDTO(
-        @NotBlank(message = "Name is required")
+
+        @NotBlank(message = "Name cannot be blank")
+        @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
         String name,
-        @NotNull(message = "Target Amount is required")
-        @Min(value = 0, message = "Target cannot be a negative number")
-        BigDecimal targetAmount,
-        @NotNull(message = "Saved Amount is required")
-        BigDecimal savedAmount,
-        @Nullable
         String reason,
-        @Nullable
-        Date deadline
-) {
-}
+        RecurrencePeriod recurrencePeriod,
+        SpendingLimitGoalType limitType,
+        @DecimalMin(value = "0.0", inclusive = false, message = "Limit amount must be greater than zero")
+        BigDecimal limitAmount,
+        @DecimalMin(value = "0.0", inclusive = false, message = "Percentage must be greater than zero")
+        @DecimalMax(value = "100.0", message = "Percentage cannot be greater than 100")
+        BigDecimal limitPercentage
+) {}
