@@ -35,11 +35,10 @@ class UserSearchedDTOTest {
                 .email("david@bowie.com")
                 .password("1234")
                 .roles(roleList)
-                .balance(BigDecimal.ZERO)
                 .birthdate(birthdate)
                 .build();
 
-        UserSearchedDTO dto = new UserSearchedDTO(1L, "David Bowie", "david@bowie.com", birthdate, BigDecimal.ZERO, RoleType.ADMIN);
+        UserSearchedDTO dto = new UserSearchedDTO(1L, "David Bowie", "david@bowie.com", birthdate, RoleType.ADMIN);
 
         UserSearchedDTO dtoConvertedByFrom = UserSearchedDTO.from(user);
 

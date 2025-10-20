@@ -50,7 +50,6 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should create a user when everything is ok")
     void create() throws ParseException {
-        // Arrange
         CreateUserDTO userDTO = new CreateUserDTO(
                 "David Bowie",
                 "bowie1940",
@@ -71,7 +70,6 @@ class UserServiceUnitTest {
                 .password(encodedPassword)
                 .birthdate(userDTO.birthdate())
                 .roles(List.of(Role.builder().name(RoleType.ADMIN).build()))
-                .balance(BigDecimal.ZERO)
                 .build();
 
         Champion champion = Champion.builder()
@@ -84,14 +82,11 @@ class UserServiceUnitTest {
         when(repository.save(any(User.class))).thenReturn(expectedUser);
 
 
-        // Act
         User createdUser = service.create(userDTO);
 
-        // Assert
         assertEquals("David Bowie", createdUser.getName());
         assertEquals("david@bowie.com.us", createdUser.getEmail());
         assertEquals(encodedPassword, createdUser.getPassword());
-        assertEquals(BigDecimal.ZERO, createdUser.getBalance());
         assertEquals(1, createdUser.getRoles().size());
         assertEquals(RoleType.ADMIN, createdUser.getRoles().get(0).getName());
 

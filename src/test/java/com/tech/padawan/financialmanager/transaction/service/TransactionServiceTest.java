@@ -1,5 +1,7 @@
 package com.tech.padawan.financialmanager.transaction.service;
 
+import com.tech.padawan.financialmanager.party.model.Party;
+import com.tech.padawan.financialmanager.party.service.IPartyService;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
@@ -8,20 +10,21 @@ import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
-import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategy;
-import com.tech.padawan.financialmanager.transaction.strategy.TransactionStrategyFactory;
-import com.tech.padawan.financialmanager.user.model.User;
-import com.tech.padawan.financialmanager.user.service.IUserService;
-import com.tech.padawan.financialmanager.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-import org.springframework.data.domain.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,143 +33,132 @@ class TransactionServiceTest {
 
     @Mock
     private TransactionRepository repository;
-
     @Mock
-    private IUserService userService;
-
+    private IPartyService partyService; // Dependência ajustada
     @Mock
     private ITransactionBalanceService balanceService;
-
     @Mock
     private ITransactionCategoryService categoryService;
 
     @InjectMocks
     private TransactionService service;
 
-    private User mockUser;
-    private TransactionCategory mockIncomeCategory;
-
+    private Party mockParty;
+    private TransactionCategory mockCategory;
     private Transaction mockTransaction;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-        mockUser = User.builder().id(1L).name("User Test").build();
-        mockIncomeCategory = TransactionCategory.builder()
-                .id(1L)
-                .name("Extra work")
-                .type(TransactionType.INCOME)
-                .user(mockUser)
-                .build();
 
-        mockTransaction = Transaction.builder()
-                .id(1L)
-                .value(BigDecimal.valueOf(100.0))
-                .description("Salary")
-                .category(mockIncomeCategory)
-                .createdAt(LocalDateTime.now())
-                .user(mockUser)
-                .build();
+        mockParty = Party.builder().id(1L).name("Test Party").build();
+
+        mockCategory = new TransactionCategory();
+        mockCategory.setId(1L);
+        mockCategory.setName("Salary");
+        mockCategory.setType(TransactionType.INCOME);
+        mockCategory.setParty(mockParty);
+
+        mockTransaction = new Transaction();
+        mockTransaction.setId(1L);
+        mockTransaction.setValue(new BigDecimal("5000.00"));
+        mockTransaction.setDescription("Monthly Salary");
+        mockTransaction.setCategory(mockCategory);
+        mockTransaction.setParty(mockParty);
+        mockTransaction.setCreatedAt(LocalDateTime.now());
     }
 
     @Test
-    @DisplayName("Should return all transactions paginated")
-    void findAll() {
+    @DisplayName("Should return all transactions for a party, paginated")
+    void shouldFindAllByPartyId() {
         Page<Transaction> page = new PageImpl<>(List.of(mockTransaction));
-        when(repository.findAllByUserIdAndDescriptionContainingIgnoreCase(
-                any(PageRequest.class),
-                eq(mockUser.getId()),
-                eq("")
-        )).thenReturn(page);
+        when(repository.findAllByPartyIdAndDescriptionContainingIgnoreCase(any(PageRequest.class), eq(1L), eq("")))
+                .thenReturn(page);
 
-        Page<SearchedTransactionDTO> result = service.findAllByUserId(mockUser.getId(),"",  1, 10, "id", "ASC");
+        Page<SearchedTransactionDTO> result = service.findAllByPartyId(1L, "", 1, 10, "id", "ASC");
 
         assertEquals(1, result.getTotalElements());
-        verify(repository).findAllByUserIdAndDescriptionContainingIgnoreCase(
-                any(PageRequest.class),
-                anyLong(),
-                anyString()
-        );
+        verify(repository).findAllByPartyIdAndDescriptionContainingIgnoreCase(any(PageRequest.class), eq(1L), eq(""));
     }
 
     @Test
     @DisplayName("Should return transaction by ID")
-    void getById() {
+    void shouldGetById() {
         when(repository.findById(1L)).thenReturn(Optional.of(mockTransaction));
-
         SearchedTransactionDTO dto = service.getById(1L);
-
         assertEquals(mockTransaction.getDescription(), dto.description());
         verify(repository).findById(1L);
     }
 
     @Test
     @DisplayName("Should throw exception when transaction not found")
-    void getById_NotFound() {
+    void shouldThrowWhenGetByIdNotFound() {
         when(repository.findById(2L)).thenReturn(Optional.empty());
-
         assertThrows(TransactionNotFound.class, () -> service.getById(2L));
     }
 
     @Test
-    @DisplayName("Should create a transaction")
-    void create() {
-        BigDecimal value = BigDecimal.valueOf(100.0);
+    @DisplayName("Should create a transaction and update party balance")
+    void shouldCreateTransaction() {
+        CreateTransactionDTO dto = new CreateTransactionDTO(1L, new BigDecimal("5000.00"), "Salary", 1L);
 
-        CreateTransactionDTO dto = new CreateTransactionDTO(
-                value,
-                "Descrição",
-                mockIncomeCategory.getId()
-        );
-
-        when(userService.getUserEntityById(mockUser.getId())).thenReturn(mockUser);
-        when(categoryService.getEntityById(mockIncomeCategory.getId())).thenReturn(mockIncomeCategory);
-        when(balanceService.applyTransaction(mockUser, value, TransactionType.INCOME)).thenReturn(mockUser);
+        when(partyService.getById(1L)).thenReturn(mockParty);
+        when(categoryService.getEntityById(1L)).thenReturn(mockCategory);
+        when(balanceService.applyTransaction(mockParty, dto.value(), mockCategory.getType())).thenReturn(mockParty);
+        doNothing().when(partyService).updateCompleted(mockParty);
         when(repository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Transaction result = service.create(mockUser.getId(), dto);
+        Transaction result = service.create(dto);
 
-        assertEquals(value, result.getValue());
-        assertEquals("Descrição", result.getDescription());
-        assertEquals(mockUser, result.getUser());
-        assertEquals(mockIncomeCategory, result.getCategory());
+        assertNotNull(result);
+        assertEquals(dto.value(), result.getValue());
+        assertEquals(dto.description(), result.getDescription());
+        assertEquals(mockParty, result.getParty());
+
+        verify(partyService).getById(1L);
+        verify(categoryService).getEntityById(1L);
+        verify(balanceService).applyTransaction(mockParty, dto.value(), mockCategory.getType());
+        verify(partyService).updateCompleted(mockParty);
+        verify(repository).save(any(Transaction.class));
     }
 
-
     @Test
-    @DisplayName("Should update a transaction")
-    void update() {
-        UpdateTransactionDTO dto = new UpdateTransactionDTO(BigDecimal.valueOf(150.0), "Updated", mockIncomeCategory.getId());
-        TransactionStrategy oldStrategy = mock(TransactionStrategy.class);
-        TransactionStrategy newStrategy = mock(TransactionStrategy.class);
+    @DisplayName("Should update a transaction and correctly revert and apply balance changes")
+    void shouldUpdateTransaction() {
+        UpdateTransactionDTO dto = new UpdateTransactionDTO(new BigDecimal("5500.00"), "Salary + Bonus", 1L);
 
+        // Mocking the service calls for the update flow
         when(repository.getReferenceById(1L)).thenReturn(mockTransaction);
-        when(categoryService.getEntityById(mockIncomeCategory.getId())).thenReturn(mockIncomeCategory);
-        when(userService.getUserEntityById(1L)).thenReturn(mockUser);
-        when(oldStrategy.revert(any(User.class), eq(BigDecimal.valueOf(100.0)))).thenReturn(mockUser);
-        when(newStrategy.apply(any(User.class), eq(BigDecimal.valueOf(150.0)))).thenReturn(mockUser);
-        when(repository.save(any(Transaction.class))).thenReturn(mockTransaction);
+        when(partyService.getById(1L)).thenReturn(mockParty);
+        when(categoryService.getEntityById(1L)).thenReturn(mockCategory);
+        when(balanceService.revertTransaction(any(Party.class), eq(mockTransaction.getValue()), eq(mockTransaction.getCategory().getType()))).thenReturn(mockParty);
+        when(balanceService.applyTransaction(any(Party.class), eq(dto.value()), eq(mockCategory.getType()))).thenReturn(mockParty);
+        doNothing().when(partyService).updateCompleted(mockParty);
+        when(repository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        try (MockedStatic<TransactionStrategyFactory> factory = mockStatic(TransactionStrategyFactory.class)) {
-            factory.when(() -> TransactionStrategyFactory.getStrategy(TransactionType.INCOME)).thenReturn(oldStrategy);
-            factory.when(() -> TransactionStrategyFactory.getStrategy(TransactionType.EXPENSE)).thenReturn(newStrategy);
+        service.update(1L, dto);
 
-            SearchedTransactionDTO result = service.update(1L, dto);
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+        verify(repository).save(captor.capture());
+        Transaction savedTransaction = captor.getValue();
 
-            assertEquals(dto.description(), result.description());
-            verify(repository).save(any(Transaction.class));
-        }
+        assertEquals(dto.value(), savedTransaction.getValue());
+        assertEquals(dto.description(), savedTransaction.getDescription());
+
+        verify(balanceService).revertTransaction(any(Party.class), eq(new BigDecimal("5000.00")), any(TransactionType.class));
+        verify(balanceService).applyTransaction(any(Party.class), eq(new BigDecimal("5500.00")), any(TransactionType.class));
     }
 
     @Test
     @DisplayName("Should delete a transaction")
-    void delete() {
+    void shouldDeleteTransaction() {
         when(repository.findById(1L)).thenReturn(Optional.of(mockTransaction));
+        doNothing().when(repository).deleteById(1L);
 
         String result = service.delete(1L);
 
         assertEquals("Transaction deleted", result);
+        verify(repository).findById(1L); // Called by getById inside delete
         verify(repository).deleteById(1L);
     }
-
 }
