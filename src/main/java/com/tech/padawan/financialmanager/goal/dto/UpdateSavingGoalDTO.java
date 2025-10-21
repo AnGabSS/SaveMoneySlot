@@ -15,8 +15,5 @@ public record UpdateSavingGoalDTO(
         String name,
         String reason,
         @DecimalMin(value = "0.0", inclusive = false, message = "Target must be greater than zero")
-        BigDecimal targetAmount,
-        @FutureOrPresent(message = "Deadline must be in the present or future")
-        LocalDate deadline
-
+        BigDecimal targetAmount
 ) {}

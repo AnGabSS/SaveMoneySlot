@@ -1,14 +1,14 @@
 -- ==== Tabelas de Usuários e Roles ====
 CREATE SEQUENCE IF NOT EXISTS roles_seq START 1 INCREMENT 50;
 CREATE TABLE IF NOT EXISTS roles (
-    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('roles_seq'), -- Ajustado
+    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('roles_seq'),
     name VARCHAR(255) NOT NULL UNIQUE,
     CONSTRAINT roles_name_check CHECK (name IN ('ADMIN', 'USER'))
 );
 
 CREATE SEQUENCE IF NOT EXISTS users_seq START 1 INCREMENT 50;
 CREATE TABLE IF NOT EXISTS users (
-    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('users_seq'), -- Ajustado
+    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('users_seq'),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
@@ -24,13 +24,14 @@ CREATE TABLE IF NOT EXISTS users_roles (
     PRIMARY KEY (user_id, role_id)
 );
 
+-- Insere as roles básicas se não existirem
 INSERT INTO roles (name) VALUES ('ADMIN'), ('USER') ON CONFLICT (name) DO NOTHING;
 
 
 -- ==== Tabelas de Champions e Parties ====
 CREATE SEQUENCE IF NOT EXISTS champion_levels_seq START 1 INCREMENT 50;
 CREATE TABLE IF NOT EXISTS champion_levels (
-    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('champion_levels_seq'), -- Ajustado
+    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('champion_levels_seq'),
     title VARCHAR(255) NOT NULL,
     points_needed INT NOT NULL DEFAULT 0,
     points_max INT NOT NULL DEFAULT 0,
@@ -39,7 +40,7 @@ CREATE TABLE IF NOT EXISTS champion_levels (
 
 CREATE SEQUENCE IF NOT EXISTS champions_seq START 1 INCREMENT 50;
 CREATE TABLE IF NOT EXISTS champions (
-    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('champions_seq'), -- Ajustado
+    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('champions_seq'),
     nickname VARCHAR(255) NOT NULL,
     points INT NOT NULL DEFAULT 0 CHECK (points >= 0),
     user_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE
@@ -47,7 +48,7 @@ CREATE TABLE IF NOT EXISTS champions (
 
 CREATE SEQUENCE IF NOT EXISTS parties_seq START 1 INCREMENT 50;
 CREATE TABLE IF NOT EXISTS parties (
-    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('parties_seq'), -- Ajustado
+    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('parties_seq'),
     name VARCHAR(255) NOT NULL,
     points INT NOT NULL DEFAULT 0 CHECK (points >= 0),
     balance NUMERIC(19, 2) NOT NULL DEFAULT 0,
@@ -56,7 +57,7 @@ CREATE TABLE IF NOT EXISTS parties (
 
 CREATE SEQUENCE IF NOT EXISTS parties_levels_seq START 1 INCREMENT 50;
 CREATE TABLE IF NOT EXISTS parties_levels (
-    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('parties_levels_seq'), -- Ajustado
+    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('parties_levels_seq'),
     title VARCHAR(255) NOT NULL,
     points_needed INT NOT NULL DEFAULT 0,
     points_max INT NOT NULL DEFAULT 0,
@@ -70,10 +71,22 @@ CREATE TABLE IF NOT EXISTS parties_champions (
 );
 
 
+-- ==== SEÇÃO DE TRANSAÇÕES E CATEGORIAS (MOVENDO PARA CIMA) ====
+CREATE SEQUENCE IF NOT EXISTS transactions_categories_seq START 1 INCREMENT 50;
+CREATE TABLE IF NOT EXISTS transactions_categories (
+    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('transactions_categories_seq'),
+    party_id BIGINT NOT NULL REFERENCES parties(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    UNIQUE (party_id, name, type),
+    CONSTRAINT transactions_categories_type_check CHECK (type IN ('INCOME', 'EXPENSE', 'INVESTMENT'))
+);
+
+
 -- ==== SEÇÃO DE METAS (GOALS) ====
 CREATE SEQUENCE IF NOT EXISTS goals_seq START 1 INCREMENT 50;
 CREATE TABLE IF NOT EXISTS goals (
-    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('goals_seq'), -- Ajustado
+    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('goals_seq'),
     party_id BIGINT NOT NULL REFERENCES parties(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     reason VARCHAR(255),
@@ -86,31 +99,27 @@ CREATE TABLE IF NOT EXISTS saving_goals (
     goal_id BIGINT PRIMARY KEY REFERENCES goals(id) ON DELETE CASCADE,
     target_amount NUMERIC(19, 2) NOT NULL CHECK (target_amount > 0),
     saved_amount NUMERIC(19, 2) NOT NULL DEFAULT 0,
-    deadline DATE
+    created_at TIMESTAMP DEFAULT LOCALTIMESTAMP,
+    is_finished BOOLEAN NOT NULL DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS spending_limit_goals (
     goal_id BIGINT PRIMARY KEY REFERENCES goals(id) ON DELETE CASCADE,
-    recurrence_period VARCHAR(50) NOT NULL CHECK (recurrence_period IN ('WEEKLY', 'MONTHLY', 'YEARLY')),
-    limit_type VARCHAR(50) NOT NULL CHECK (limit_type IN ('AMOUNT', 'PERCENTUAL')),
-    limit_amount NUMERIC(19, 2) CHECK (limit_amount > 0),
-    limit_percentage NUMERIC(5, 2) CHECK (limit_percentage > 0 AND limit_percentage <= 100)
+    category_id BIGINT NOT NULL REFERENCES transactions_categories(id),
+    limit_type VARCHAR(50) NOT NULL,
+    limit_amount NUMERIC(19, 2) CHECK (limit_amount IS NULL OR limit_amount > 0),
+    limit_percentage NUMERIC(5, 2) CHECK (limit_percentage IS NULL OR (limit_percentage > 0 AND limit_percentage <= 100)),
+    initial_date DATE NOT NULL,
+    final_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT LOCALTIMESTAMP,
+    CONSTRAINT spending_limit_goals_type_check CHECK (limit_type IN ('AMOUNT', 'PERCENTUAL'))
 );
 
 
--- ==== Tabelas de Transações ====
-CREATE SEQUENCE IF NOT EXISTS transactions_categories_seq START 1 INCREMENT 50;
-CREATE TABLE IF NOT EXISTS transactions_categories (
-    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('transactions_categories_seq'), -- Ajustado
-    party_id BIGINT NOT NULL REFERENCES parties(id) ON DELETE CASCADE,
-    name VARCHAR(100) NOT NULL,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('INCOME', 'EXPENSE', 'INVESTMENT')),
-    UNIQUE (party_id, name, type)
-);
-
+-- ==== SEÇÃO DE TRANSAÇÕES (DEFINIÇÃO FINAL) ====
 CREATE SEQUENCE IF NOT EXISTS transactions_seq START 1 INCREMENT 50;
 CREATE TABLE IF NOT EXISTS transactions (
-    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('transactions_seq'), -- Ajustado
+    id bigint NOT NULL PRIMARY KEY DEFAULT nextval('transactions_seq'),
     party_id BIGINT NOT NULL REFERENCES parties(id) ON DELETE CASCADE,
     category_id BIGINT NOT NULL REFERENCES transactions_categories(id) ON DELETE RESTRICT,
     description VARCHAR(255) NOT NULL,

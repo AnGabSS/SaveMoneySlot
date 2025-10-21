@@ -15,6 +15,5 @@ public record CreateSavingGoalDTO(
         String reason,
         @NotNull Long partyId,
         @NotNull @DecimalMin("0.0") BigDecimal targetAmount,
-        BigDecimal savedAmount,
-        LocalDate deadline
+        BigDecimal savedAmount
 ) {}

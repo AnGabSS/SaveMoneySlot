@@ -6,6 +6,8 @@ import com.tech.padawan.financialmanager.goal.repository.GoalRepository;
 import com.tech.padawan.financialmanager.goal.service.exception.GoalNotFoundException;
 import com.tech.padawan.financialmanager.party.model.Party;
 import com.tech.padawan.financialmanager.party.service.IPartyService;
+import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
+import com.tech.padawan.financialmanager.transaction.service.ITransactionCategoryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -13,64 +15,45 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class GoalService implements IGoalService {
 
     private final GoalRepository repository;
     private final IPartyService partyService;
+    private final ITransactionCategoryService transactionCategoryService;
 
-    public GoalService(GoalRepository repository, IPartyService partyService) {
+    public GoalService(GoalRepository repository, IPartyService partyService, ITransactionCategoryService transactionCategoryService) {
         this.repository = repository;
         this.partyService = partyService;
+        this.transactionCategoryService = transactionCategoryService;
     }
 
-    @Override
-    @Transactional
-    public SavingGoal createSavingGoal(CreateSavingGoalDTO dto) {
-        Party party = partyService.getById(dto.partyId());
 
-        SavingGoal goal = new SavingGoal();
-        goal.setName(dto.name());
-        goal.setReason(dto.reason());
-        goal.setParty(party);
-        goal.setTargetAmount(dto.targetAmount());
-        goal.setDeadline(dto.deadline());
-        goal.setSavedAmount(dto.savedAmount() != null ? dto.savedAmount() : BigDecimal.ZERO);
-
-        return repository.save(goal);
-    }
 
     @Override
     @Transactional
     public SpendingLimitGoal createSpendingLimitGoal(CreateSpendingLimitGoalDTO dto) {
         Party party = partyService.getById(dto.partyId());
+        TransactionCategory category = transactionCategoryService.getEntityById(dto.category());
         validateSpendingLimit(dto);
 
         SpendingLimitGoal goal = new SpendingLimitGoal();
         goal.setName(dto.name());
         goal.setReason(dto.reason());
         goal.setParty(party);
-        goal.setRecurrencePeriod(dto.recurrencePeriod());
+        goal.setInitialDate(dto.initialDate());
+        goal.setFinalDate(dto.finalDate());
         goal.setLimitType(dto.limitType());
         goal.setLimitAmount(dto.limitAmount());
         goal.setLimitPercentage(dto.limitPercentage());
+        goal.setCategory(category);
 
         return repository.save(goal);
     }
 
-    @Override
-    @Transactional
-    public SearchedGoalDTO updateSavingGoal(Long id, UpdateSavingGoalDTO dto) {
-        SavingGoal goal = findSavingGoalById(id);
-
-        if (dto.name() != null) goal.setName(dto.name());
-        if (dto.reason() != null) goal.setReason(dto.reason());
-        if (dto.targetAmount() != null) goal.setTargetAmount(dto.targetAmount());
-        if (dto.deadline() != null) goal.setDeadline(dto.deadline());
-
-        return SearchedGoalDTO.from(repository.save(goal));
-    }
 
     @Override
     @Transactional
@@ -79,19 +62,12 @@ public class GoalService implements IGoalService {
 
         if (dto.name() != null) goal.setName(dto.name());
         if (dto.reason() != null) goal.setReason(dto.reason());
-        if (dto.recurrencePeriod() != null) goal.setRecurrencePeriod(dto.recurrencePeriod());
+        if (dto.initialDate() != null) goal.setInitialDate(dto.initialDate());
+        if (dto.finalDate() != null) goal.setFinalDate(dto.finalDate());
         if (dto.limitType() != null) goal.setLimitType(dto.limitType());
         if (dto.limitAmount() != null) goal.setLimitAmount(dto.limitAmount());
         if (dto.limitPercentage() != null) goal.setLimitPercentage(dto.limitPercentage());
 
-        return SearchedGoalDTO.from(repository.save(goal));
-    }
-
-    @Override
-    @Transactional
-    public SearchedGoalDTO updateSaveAmount(Long id, BigDecimal newSaveAmount) {
-        SavingGoal goal = findSavingGoalById(id);
-        goal.setSavedAmount(newSaveAmount);
         return SearchedGoalDTO.from(repository.save(goal));
     }
 
@@ -121,15 +97,14 @@ public class GoalService implements IGoalService {
         return "Goal deleted successfully.";
     }
 
-
-    // --- MÉTODOS AUXILIARES ---
-
-    private SavingGoal findSavingGoalById(Long id) {
-        return repository.findById(id)
-                .filter(g -> g instanceof SavingGoal)
-                .map(g -> (SavingGoal) g)
-                .orElseThrow(() -> new GoalNotFoundException("Saving Goal with id " + id + " not found."));
-    }
+    @Override
+    public String complete(Long id) {
+        Goal goal = repository.findById(id)
+                .orElseThrow(() -> new GoalNotFoundException("Goal with id " + id + " not found."));
+        goal.setCompleted(true);
+        repository.save(goal);
+        return "Goal sucessfully completed";
+    };
 
     private SpendingLimitGoal findSpendingLimitGoalById(Long id) {
         return repository.findById(id)

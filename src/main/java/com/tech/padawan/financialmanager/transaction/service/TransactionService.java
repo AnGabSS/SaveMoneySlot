@@ -7,6 +7,7 @@ import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
 import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
+import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import com.tech.padawan.financialmanager.transaction.repository.TransactionRepository;
 import com.tech.padawan.financialmanager.transaction.service.exception.TransactionNotFound;
 import com.tech.padawan.financialmanager.party.model.Party;
@@ -110,6 +111,21 @@ public class TransactionService implements ITransactionService{
     @Override
     public List<Transaction> findAllByPartyIdAndMonth(Long id, LocalDateTime initialDate, LocalDateTime finalDate) {
         return repository.findAllByPartyIdAndCreatedAtBetween(id, initialDate, finalDate);
+    }
+
+    @Override
+    public List<Transaction> findAllByPartyIdAndMonthAndType(Long id, LocalDateTime initialDate, LocalDateTime finalDate, TransactionType type) {
+        return repository.findAllByPartyIdAndCreatedAtBetweenAndCategoryType(id, initialDate, finalDate, type);
+    }
+
+    @Override
+    public List<Transaction> findAllByPartyIdAndMonthAndCategory(Long id, LocalDateTime initialDate, LocalDateTime finalDate, TransactionCategory category) {
+        return repository.findAllByPartyIdAndCreatedAtBetweenAndCategory(id, initialDate, finalDate, category);
+    }
+
+    @Override
+    public List<Transaction> findAllByPartyIdAndType(Long id, TransactionType type) {
+        return repository.findAllByPartyIdAndCategoryType(id, type);
     }
 
 }

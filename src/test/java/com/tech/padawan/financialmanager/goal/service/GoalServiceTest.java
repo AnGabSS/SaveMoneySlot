@@ -38,6 +38,9 @@ class GoalServiceTest {
     @InjectMocks
     private GoalService service;
 
+    @InjectMocks
+    private SavingGoalService goalService;
+
     private Party mockParty;
     private SavingGoal mockSavingGoal;
     private SpendingLimitGoal mockSpendingLimitGoal;
@@ -67,11 +70,11 @@ class GoalServiceTest {
     @Test
     @DisplayName("Should create a Saving Goal successfully")
     void shouldCreateSavingGoal() {
-        CreateSavingGoalDTO dto = new CreateSavingGoalDTO("New Car", "For family trips", 1L, new BigDecimal("60000"), BigDecimal.ZERO, LocalDate.now().plusYears(2));
+        CreateSavingGoalDTO dto = new CreateSavingGoalDTO("New Car", "For family trips", 1L, new BigDecimal("60000"), BigDecimal.ZERO);
         when(partyService.getById(1L)).thenReturn(mockParty);
         when(repository.save(any(SavingGoal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        SavingGoal result = service.createSavingGoal(dto);
+        SavingGoal result = goalService.createSavingGoal(dto);
 
         assertNotNull(result);
         assertEquals(dto.name(), result.getName());
@@ -100,11 +103,11 @@ class GoalServiceTest {
     @Test
     @DisplayName("Should update a Saving Goal successfully")
     void shouldUpdateSavingGoal() {
-        UpdateSavingGoalDTO dto = new UpdateSavingGoalDTO("Updated Car Name", "New reason", new BigDecimal("55000"), null);
+        UpdateSavingGoalDTO dto = new UpdateSavingGoalDTO("Updated Car Name", "New reason", new BigDecimal("55000"));
         when(repository.findById(1L)).thenReturn(Optional.of(mockSavingGoal));
         when(repository.save(any(SavingGoal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        service.updateSavingGoal(1L, dto);
+        goalService.updateSavingGoal(1L, dto);
 
         ArgumentCaptor<SavingGoal> captor = ArgumentCaptor.forClass(SavingGoal.class);
         verify(repository).save(captor.capture());
@@ -117,10 +120,10 @@ class GoalServiceTest {
     @Test
     @DisplayName("Should throw exception when updating a non-saving goal as a saving goal")
     void shouldThrowWhenUpdatingWrongType() {
-        UpdateSavingGoalDTO dto = new UpdateSavingGoalDTO("Name", null, null, null);
+        UpdateSavingGoalDTO dto = new UpdateSavingGoalDTO("Name", null, null);
         when(repository.findById(2L)).thenReturn(Optional.of(mockSpendingLimitGoal)); // Retorna o tipo errado
 
-        assertThrows(GoalNotFoundException.class, () -> service.updateSavingGoal(2L, dto));
+        assertThrows(GoalNotFoundException.class, () -> goalService.updateSavingGoal(2L, dto));
     }
 
     @Test
@@ -129,7 +132,7 @@ class GoalServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(mockSavingGoal));
         when(repository.save(any(SavingGoal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        service.updateSaveAmount(1L, new BigDecimal("10000"));
+        goalService.updateSaveAmount(1L, new BigDecimal("10000"));
 
         ArgumentCaptor<SavingGoal> captor = ArgumentCaptor.forClass(SavingGoal.class);
         verify(repository).save(captor.capture());
@@ -142,7 +145,7 @@ class GoalServiceTest {
     void shouldThrowWhenUpdateSaveAmountOnWrongType() {
         when(repository.findById(2L)).thenReturn(Optional.of(mockSpendingLimitGoal));
 
-        assertThrows(GoalNotFoundException.class, () -> service.updateSaveAmount(2L, new BigDecimal("100")));
+        assertThrows(GoalNotFoundException.class, () -> goalService.updateSaveAmount(2L, new BigDecimal("100")));
         verify(repository, never()).save(any());
     }
 

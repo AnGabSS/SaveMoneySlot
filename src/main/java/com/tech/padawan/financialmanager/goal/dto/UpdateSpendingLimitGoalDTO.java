@@ -6,6 +6,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 public record UpdateSpendingLimitGoalDTO(
@@ -14,11 +15,12 @@ public record UpdateSpendingLimitGoalDTO(
         @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
         String name,
         String reason,
-        RecurrencePeriod recurrencePeriod,
         SpendingLimitGoalType limitType,
         @DecimalMin(value = "0.0", inclusive = false, message = "Limit amount must be greater than zero")
         BigDecimal limitAmount,
         @DecimalMin(value = "0.0", inclusive = false, message = "Percentage must be greater than zero")
         @DecimalMax(value = "100.0", message = "Percentage cannot be greater than 100")
-        BigDecimal limitPercentage
+        BigDecimal limitPercentage,
+        LocalDate initialDate,
+        LocalDate finalDate
 ) {}

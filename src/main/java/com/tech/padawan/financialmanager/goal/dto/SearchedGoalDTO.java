@@ -2,6 +2,7 @@ package com.tech.padawan.financialmanager.goal.dto;
 
 import com.tech.padawan.financialmanager.goal.model.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -11,7 +12,6 @@ import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record SearchedGoalDTO(
-        // Campos Comuns
         Long id,
         String name,
         String reason,
@@ -23,10 +23,12 @@ public record SearchedGoalDTO(
         BigDecimal targetAmount,
         BigDecimal savedAmount,
         LocalDate deadline,
-        RecurrencePeriod recurrencePeriod,
         SpendingLimitGoalType limitType,
         BigDecimal limitAmount,
-        BigDecimal limitPercentage
+        BigDecimal limitPercentage,
+        LocalDate initialDate,
+        LocalDate finalDate,
+        TransactionCategory category
 ) {
 
     public static SearchedGoalDTO from(Goal goal) {
@@ -46,29 +48,35 @@ public record SearchedGoalDTO(
         BigDecimal targetAmount = null;
         BigDecimal savedAmount = null;
         LocalDate deadline = null;
-        RecurrencePeriod recurrencePeriod = null;
         SpendingLimitGoalType limitType = null;
         BigDecimal limitAmount = null;
         BigDecimal limitPercentage = null;
+        LocalDate initialDate = null;
+        LocalDate finalDate = null;
+        TransactionCategory category = null;
 
         if (goal instanceof SavingGoal savingGoal) {
             goalType = GoalType.SAVING;
             targetAmount = savingGoal.getTargetAmount();
             savedAmount = savingGoal.getSavedAmount();
-            deadline = savingGoal.getDeadline();
+            createdAt = savingGoal.getCreatedAt();
         } else if (goal instanceof SpendingLimitGoal spendingLimitGoal) {
             goalType = GoalType.SPENDING_LIMIT;
-            recurrencePeriod = spendingLimitGoal.getRecurrencePeriod();
+            initialDate = spendingLimitGoal.getInitialDate();
+            finalDate = spendingLimitGoal.getFinalDate();
             limitType = spendingLimitGoal.getLimitType();
             limitAmount = spendingLimitGoal.getLimitAmount();
             limitPercentage = spendingLimitGoal.getLimitPercentage();
+            category = spendingLimitGoal.getCategory();
         }
 
         return new SearchedGoalDTO(
-                id, name, reason, isCompleted, createdAt, updatedAt, partyId,
+                id,
+                name, reason, isCompleted, createdAt, updatedAt, partyId,
                 goalType,
                 targetAmount, savedAmount, deadline,
-                recurrencePeriod, limitType, limitAmount, limitPercentage
+                limitType, limitAmount, limitPercentage, initialDate, finalDate, category
+
         );
     }
 }

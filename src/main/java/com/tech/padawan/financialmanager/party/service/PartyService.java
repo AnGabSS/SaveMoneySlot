@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -64,6 +65,7 @@ public class PartyService implements IPartyService {
                 .name(partyDTO.name())
                 .champions(List.of(champion))
                 .createdAt(LocalDateTime.now())
+                .balance(BigDecimal.ZERO)
                 .build();
         return repository.save(party);
     }
@@ -74,6 +76,13 @@ public class PartyService implements IPartyService {
         party.setName(partyDTO.name());
         repository.save(party);
         return SearchedPartyDTO.from(party, levels);
+    }
+
+    @Override
+    public Party updatePoints(Long id, Integer points) {
+        Party party = this.getById(id);
+        party.setPoints(party.getPoints() + points);
+        return repository.save(party);
     }
 
     @Override

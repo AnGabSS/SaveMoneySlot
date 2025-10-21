@@ -5,6 +5,7 @@ import com.tech.padawan.financialmanager.goal.model.Goal;
 import com.tech.padawan.financialmanager.goal.model.SavingGoal;
 import com.tech.padawan.financialmanager.goal.model.SpendingLimitGoal;
 import com.tech.padawan.financialmanager.goal.service.IGoalService;
+import com.tech.padawan.financialmanager.goal.service.ISavingGoalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,9 +26,12 @@ import java.net.URI;
 public class GoalController {
 
     private final IGoalService service;
+    private final ISavingGoalService savingGoalService;
 
-    public GoalController(IGoalService service) {
+    public GoalController(IGoalService service,  ISavingGoalService savingGoalService) {
+
         this.service = service;
+        this.savingGoalService = savingGoalService;
     }
 
 
@@ -36,10 +40,11 @@ public class GoalController {
             @ApiResponse(responseCode = "400", description = "Invalid request payload.", content = @Content)
     })
     @PostMapping("/saving")
-    public ResponseEntity<SavingGoal> createSavingGoal(@Valid @RequestBody CreateSavingGoalDTO dto) {
-        SavingGoal createdGoal = service.createSavingGoal(dto);
+    public ResponseEntity<SearchedGoalDTO> createSavingGoal(@Valid @RequestBody CreateSavingGoalDTO dto) {
+        SavingGoal createdGoal = savingGoalService.createSavingGoal(dto);
+        SearchedGoalDTO goalDTO = SearchedGoalDTO.from(createdGoal);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdGoal.getId()).toUri();
-        return ResponseEntity.created(uri).body(createdGoal);
+        return ResponseEntity.created(uri).body(goalDTO);
     }
 
     @Operation(summary = "Create a new Spending Limit Goal", responses = {
@@ -47,10 +52,11 @@ public class GoalController {
             @ApiResponse(responseCode = "400", description = "Invalid request payload.", content = @Content)
     })
     @PostMapping("/spending-limit")
-    public ResponseEntity<SpendingLimitGoal> createSpendingLimitGoal(@Valid @RequestBody CreateSpendingLimitGoalDTO dto) {
+    public ResponseEntity<SearchedGoalDTO> createSpendingLimitGoal(@Valid @RequestBody CreateSpendingLimitGoalDTO dto) {
         SpendingLimitGoal createdGoal = service.createSpendingLimitGoal(dto);
+        SearchedGoalDTO goalDTO = SearchedGoalDTO.from(createdGoal);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdGoal.getId()).toUri();
-        return ResponseEntity.created(uri).body(createdGoal);
+        return ResponseEntity.created(uri).body(goalDTO);
     }
 
 
@@ -60,7 +66,7 @@ public class GoalController {
     })
     @PutMapping("/saving/{id}")
     public ResponseEntity<SearchedGoalDTO> updateSavingGoal(@PathVariable Long id, @Valid @RequestBody UpdateSavingGoalDTO dto) {
-        return ResponseEntity.ok(service.updateSavingGoal(id, dto));
+        return ResponseEntity.ok(savingGoalService.updateSavingGoal(id, dto));
     }
 
     @Operation(summary = "Update an existing Spending Limit Goal", responses = {
@@ -78,7 +84,7 @@ public class GoalController {
     })
     @PatchMapping("/saving/{id}/saved-amount")
     public ResponseEntity<SearchedGoalDTO> updateSavedAmount(@PathVariable Long id, @Valid @RequestBody UpdateSaveAmountDTO dto) {
-        return ResponseEntity.ok(service.updateSaveAmount(id, dto.value()));
+        return ResponseEntity.ok(savingGoalService.updateSaveAmount(id, dto.value()));
     }
 
 

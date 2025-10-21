@@ -29,7 +29,8 @@ public class Party {
     @Setter
     @NotBlank(message = "Name is required")
     private String name;
-
+    
+    @Setter
     @NotNull(message = "Points is required")
     @Min(value = 0, message = "Value be a negative number")
     private int points;

@@ -8,13 +8,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public record CreateSpendingLimitGoalDTO(
         @NotBlank String name,
         String reason,
         @NotNull Long partyId,
-        @NotNull RecurrencePeriod recurrencePeriod,
         @NotNull SpendingLimitGoalType limitType,
         @DecimalMin("0.0") BigDecimal limitAmount,
-        @DecimalMin("0.0") @DecimalMax("100.0") BigDecimal limitPercentage
+        @DecimalMin("0.0") @DecimalMax("100.0") BigDecimal limitPercentage,
+        @NotNull LocalDate initialDate,
+        @NotNull LocalDate finalDate,
+        @NotNull Long category
 ) {}

@@ -2,6 +2,7 @@ package com.tech.padawan.financialmanager.global.config;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.tech.padawan.financialmanager.global.exception.AlreadyExistsException;
+import com.tech.padawan.financialmanager.global.exception.BusinessRuleException;
 import com.tech.padawan.financialmanager.global.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,16 @@ public class GlobalExceptionHandler {
     ) {
         Map<String, String> body = new HashMap<>();
         body.put("error", "Already exists");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<Map<String, String>> handleBusinessRuleException(
+            BusinessRuleException ex
+    ) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", "Business rules violation");
         body.put("message", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }

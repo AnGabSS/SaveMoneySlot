@@ -10,6 +10,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @DiscriminatorValue("SAVING")
@@ -30,13 +31,6 @@ public class SavingGoal extends Goal {
     @DecimalMin(value = "0.0", message = "Saved amount cannot be negative")
     private BigDecimal savedAmount;
 
-    private LocalDate deadline; // Usando LocalDate para datas sem hora
+    private LocalDateTime createdAt;
 
-    @Override
-    protected void onUpdate() {
-        super.onUpdate();
-        if (this.savedAmount != null && this.targetAmount != null) {
-            this.setCompleted(this.savedAmount.compareTo(this.targetAmount) >= 0);
-        }
-    }
 }

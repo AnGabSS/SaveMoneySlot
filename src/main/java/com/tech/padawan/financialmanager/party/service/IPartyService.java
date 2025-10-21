@@ -12,6 +12,7 @@ public interface IPartyService {
     SearchedPartyDTO getByIdFormatted(Long id);
     Party create(Long championId, CreateUpdatePartyDTO partyDTO);
     SearchedPartyDTO update(Long id, CreateUpdatePartyDTO partyDTO);
+    Party updatePoints(Long id, Integer points);
     Party updateCompleted(Party party);
     SearchedPartyDTO addChampion(Long id, ChangeChampionInPartyDTO dto);
     SearchedPartyDTO removeChampion(Long id, ChangeChampionInPartyDTO dto);

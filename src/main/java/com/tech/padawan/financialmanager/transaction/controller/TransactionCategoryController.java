@@ -21,7 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/v1/transaction/category")
+@RequestMapping("/api/v1/transaction-category")
 @Tag(
         name = "Transaction Categories",
         description = "Responsible for defining the different types of transactions, such as an expense with a car or money received from a freelance job."

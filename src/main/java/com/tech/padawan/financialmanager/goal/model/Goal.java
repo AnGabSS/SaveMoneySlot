@@ -26,7 +26,6 @@ public abstract class Goal {
 
     private String reason;
 
-    @Column(columnDefinition = "boolean default false")
     private boolean isCompleted;
 
     private LocalDateTime createdAt;
