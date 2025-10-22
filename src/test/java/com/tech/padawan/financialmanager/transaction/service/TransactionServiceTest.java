@@ -105,7 +105,7 @@ class TransactionServiceTest {
         when(partyService.getById(1L)).thenReturn(mockParty);
         when(categoryService.getEntityById(1L)).thenReturn(mockCategory);
         when(balanceService.applyTransaction(mockParty, dto.value(), mockCategory.getType())).thenReturn(mockParty);
-        doNothing().when(partyService).updateCompleted(mockParty);
+        when(partyService.updateCompleted(mockParty)).thenReturn(mockParty);
         when(repository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Transaction result = service.create(dto);
@@ -133,7 +133,7 @@ class TransactionServiceTest {
         when(categoryService.getEntityById(1L)).thenReturn(mockCategory);
         when(balanceService.revertTransaction(any(Party.class), eq(mockTransaction.getValue()), eq(mockTransaction.getCategory().getType()))).thenReturn(mockParty);
         when(balanceService.applyTransaction(any(Party.class), eq(dto.value()), eq(mockCategory.getType()))).thenReturn(mockParty);
-        doNothing().when(partyService).updateCompleted(mockParty);
+        when(partyService.updateCompleted(mockParty)).thenReturn(mockParty);
         when(repository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         service.update(1L, dto);

@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,7 +43,6 @@ class TransactionControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Repositórios para setup de dados
     @Autowired
     private PartyRepository partyRepository;
     @Autowired
@@ -59,7 +59,14 @@ class TransactionControllerTest {
         categoryRepository.deleteAll();
         partyRepository.deleteAll();
 
-        this.testParty = partyRepository.save(Party.builder().name("Test Party").build());
+        Party partyToSave = Party.builder()
+                .name("Test Party")
+                .points(0)
+                .balance(BigDecimal.ZERO)
+                .champions(new ArrayList<>())
+                .build();
+
+        this.testParty = partyRepository.save(partyToSave);
         this.testCategory = categoryRepository.save(new TransactionCategory(null, "Games", TransactionType.EXPENSE, this.testParty));
     }
 
@@ -69,6 +76,7 @@ class TransactionControllerTest {
         CreateTransactionDTO createDto = new CreateTransactionDTO(testParty.getId(), new BigDecimal("200.00"), "Cyberpunk 2077", testCategory.getId());
 
         mockMvc.perform(post("/api/v1/transaction")
+                        .header("Authorization", "Bearer mock-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDto)))
                 .andExpect(status().isCreated())
@@ -82,7 +90,8 @@ class TransactionControllerTest {
         transactionRepository.save(new Transaction(null, new BigDecimal("250.00"), "Steam Sale", LocalDateTime.now(), testCategory, testParty));
         transactionRepository.save(new Transaction(null, new BigDecimal("70.00"), "DLC Phantom Liberty", LocalDateTime.now(), testCategory, testParty));
 
-        mockMvc.perform(get("/api/v1/transaction/" + testParty.getId() + "?page=0&size=10"))
+        mockMvc.perform(get("/api/v1/transaction/" + testParty.getId() + "?page=1&size=10")
+                        .header("Authorization", "Bearer mock-token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].description", containsInAnyOrder("Steam Sale", "DLC Phantom Liberty")));
@@ -93,8 +102,8 @@ class TransactionControllerTest {
     void shouldReturnTransactionById() throws Exception {
         Transaction transaction = transactionRepository.save(new Transaction(null, new BigDecimal("150.00"), "Game Pass", LocalDateTime.now(), testCategory, testParty));
 
-        // O endpoint para buscar por ID no seu controller é /find-by-id/{id}
-        mockMvc.perform(get("/api/v1/transaction/find-by-id/" + transaction.getId()))
+        mockMvc.perform(get("/api/v1/transaction/find-by-id/" + transaction.getId())
+                        .header("Authorization", "Bearer mock-token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(transaction.getId()))
                 .andExpect(jsonPath("$.description").value("Game Pass"))
@@ -108,8 +117,9 @@ class TransactionControllerTest {
         UpdateTransactionDTO updateDto = new UpdateTransactionDTO(new BigDecimal("120.50"), "PSN Credits (new value)", testCategory.getId());
 
         mockMvc.perform(put("/api/v1/transaction/" + transaction.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+                        .header("Authorization", "Bearer mock-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(transaction.getId()))
                 .andExpect(jsonPath("$.description").value("PSN Credits (new value)"))
@@ -121,7 +131,8 @@ class TransactionControllerTest {
     void shouldDeleteTransaction() throws Exception {
         Transaction transaction = transactionRepository.save(new Transaction(null, new BigDecimal("50.00"), "Game to be deleted", LocalDateTime.now(), testCategory, testParty));
 
-        mockMvc.perform(delete("/api/v1/transaction/" + transaction.getId()))
+        mockMvc.perform(delete("/api/v1/transaction/" + transaction.getId())
+                        .header("Authorization", "Bearer mock-token"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Transaction deleted"));
     }

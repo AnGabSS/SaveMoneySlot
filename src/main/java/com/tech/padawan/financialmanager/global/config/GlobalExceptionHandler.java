@@ -4,6 +4,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.tech.padawan.financialmanager.global.exception.AlreadyExistsException;
 import com.tech.padawan.financialmanager.global.exception.BusinessRuleException;
 import com.tech.padawan.financialmanager.global.exception.NotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -27,6 +30,29 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = "Data integrity violation."; // Default message
+
+        Throwable rootCause = ex.getRootCause();
+        if (rootCause != null) {
+            String rootCauseMessage = rootCause.getMessage();
+
+            Pattern pattern = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) already exists\\.");
+            Matcher matcher = pattern.matcher(rootCauseMessage);
+
+            if (matcher.find()) {
+                String fieldName = matcher.group(1);
+                String value = matcher.group(2);
+                message = String.format("A record with this %s already exists.", fieldName);
+            }
+        }
+
+        Map<String, String> body = Map.of("message", message);
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NotFoundException.class)

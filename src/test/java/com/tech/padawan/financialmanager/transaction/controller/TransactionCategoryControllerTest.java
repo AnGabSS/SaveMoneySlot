@@ -1,9 +1,9 @@
 package com.tech.padawan.financialmanager.transaction.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tech.padawan.financialmanager.global.config.security.TestSecurityConfig;
 import com.tech.padawan.financialmanager.party.model.Party;
 import com.tech.padawan.financialmanager.party.repository.PartyRepository;
-import com.tech.padawan.financialmanager.global.config.security.TestSecurityConfig;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionCategoryDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionCategoryDTO;
 import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
@@ -22,6 +22,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,7 +42,6 @@ class TransactionCategoryControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Repositórios para setup de dados
     @Autowired
     private PartyRepository partyRepository;
     @Autowired
@@ -51,24 +53,25 @@ class TransactionCategoryControllerTest {
 
     @BeforeEach
     void setup() {
-        // Limpa os repositórios na ordem correta para evitar conflitos de FK
         transactionRepository.deleteAll();
         categoryRepository.deleteAll();
         partyRepository.deleteAll();
 
-        // Cria uma Party para ser usada nos testes, em vez de um User
         Party party = new Party();
         party.setName("Test Party");
+        party.setPoints(0);
+        party.setBalance(BigDecimal.ZERO);
+        party.setChampions(new ArrayList<>());
         this.testParty = partyRepository.save(party);
     }
 
     @Test
     @DisplayName("Should create a category and return 201 Created")
     void shouldCreateACategoryAndReturn201() throws Exception {
-        // DTO agora precisa do partyId
-        CreateTransactionCategoryDTO createDTO = new CreateTransactionCategoryDTO(1L, "Food", TransactionType.EXPENSE);
+        CreateTransactionCategoryDTO createDTO = new CreateTransactionCategoryDTO(testParty.getId(), "Food", TransactionType.EXPENSE);
 
-        mockMvc.perform(post("/api/v1/transaction/category")
+        mockMvc.perform(post("/api/v1/transaction-category")
+                        .header("Authorization", "Bearer mock-jwt-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isCreated())
@@ -79,12 +82,10 @@ class TransactionCategoryControllerTest {
     @Test
     @DisplayName("Should return a page of categories for a specific Party")
     void shouldReturnAPageOfCategoriesByParty() throws Exception {
-        // Cria categorias associadas à nossa Party de teste
         categoryRepository.save(new TransactionCategory(null, "Leisure", TransactionType.EXPENSE, testParty));
         categoryRepository.save(new TransactionCategory(null, "Salary", TransactionType.INCOME, testParty));
 
-        // Endpoint agora busca por partyId
-        mockMvc.perform(get("/api/v1/transaction/category/find-by-id/" + testParty.getId() + "?page=1&size=10"))
+        mockMvc.perform(get("/api/v1/transaction-category/find-by-id/" + testParty.getId() + "?page=1&size=10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("Leisure", "Salary")));
@@ -95,7 +96,7 @@ class TransactionCategoryControllerTest {
     void shouldReturnACategoryByItsID() throws Exception {
         TransactionCategory category = categoryRepository.save(new TransactionCategory(null, "Health", TransactionType.EXPENSE, testParty));
 
-        mockMvc.perform(get("/api/v1/transaction/category/" + category.getId()))
+        mockMvc.perform(get("/api/v1/transaction-category/" + category.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(category.getId()))
                 .andExpect(jsonPath("$.name").value("Health"));
@@ -107,7 +108,7 @@ class TransactionCategoryControllerTest {
         TransactionCategory originalCategory = categoryRepository.save(new TransactionCategory(null, "Leisure", TransactionType.EXPENSE, testParty));
         UpdateTransactionCategoryDTO updateDTO = new UpdateTransactionCategoryDTO("Updated Leisure", TransactionType.EXPENSE);
 
-        mockMvc.perform(put("/api/v1/transaction/category/" + originalCategory.getId())
+        mockMvc.perform(put("/api/v1/transaction-category/" + originalCategory.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
@@ -120,7 +121,7 @@ class TransactionCategoryControllerTest {
     void shouldDeleteACategoryAndReturn200() throws Exception {
         TransactionCategory categoryToDelete = categoryRepository.save(new TransactionCategory(null, "Temporary", TransactionType.EXPENSE, testParty));
 
-        mockMvc.perform(delete("/api/v1/transaction/category/" + categoryToDelete.getId()))
+        mockMvc.perform(delete("/api/v1/transaction-category/" + categoryToDelete.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Transaction category deleted"));
     }

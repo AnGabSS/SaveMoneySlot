@@ -59,7 +59,7 @@ public class SavingGoalService implements ISavingGoalService{
     @Transactional
     public SearchedGoalDTO updateSaveAmount(Long id, BigDecimal newSaveAmount) {
         SavingGoal goal = findSavingGoalById(id);
-        goal.setSavedAmount(newSaveAmount);
+        goal.setSavedAmount(goal.getSavedAmount().add(newSaveAmount));
         return SearchedGoalDTO.from(repository.save(goal));
     }
 
