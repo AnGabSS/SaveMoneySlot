@@ -57,7 +57,7 @@ testImplementation 'org.springframework.security:spring-security-test'
 
 ### 📊 Cobertura de Testes | Test Coverage
 
-**Cobertura Atual: 61%** \
+**Cobertura Atual: 71%** \
 \
 O projeto utiliza **[JaCoCo](https://www.jacoco.org/jacoco/)** para gerar relatórios de cobertura de testes.
 Você pode visualizar o html pelo caminho:
