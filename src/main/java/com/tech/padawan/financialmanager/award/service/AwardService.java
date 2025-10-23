@@ -3,7 +3,6 @@ package com.tech.padawan.financialmanager.award.service;
 import com.tech.padawan.financialmanager.award.dto.AwardResultDTO;
 import com.tech.padawan.financialmanager.award.exceptions.CannotReceiveTheAwardException;
 import com.tech.padawan.financialmanager.goal.dto.SearchedGoalDTO;
-import com.tech.padawan.financialmanager.goal.model.SpendingLimitGoalType;
 import com.tech.padawan.financialmanager.goal.service.IGoalService;
 import com.tech.padawan.financialmanager.goal.service.ISavingGoalService;
 import com.tech.padawan.financialmanager.party.model.Party;

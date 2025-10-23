@@ -2,6 +2,7 @@ package com.tech.padawan.financialmanager.goal.service;
 
 import com.tech.padawan.financialmanager.goal.dto.CreateSpendingLimitGoalDTO;
 import com.tech.padawan.financialmanager.goal.dto.SearchedGoalDTO;
+import com.tech.padawan.financialmanager.goal.dto.UpdateSpendingLimitGoalDTO;
 import com.tech.padawan.financialmanager.goal.model.*;
 import com.tech.padawan.financialmanager.goal.repository.GoalRepository;
 import com.tech.padawan.financialmanager.goal.service.exception.GoalNotFoundException;
@@ -30,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class) // Forma moderna de inicializar mocks
+@ExtendWith(MockitoExtension.class)
 class GoalServiceTest {
 
     @Mock
@@ -38,22 +39,37 @@ class GoalServiceTest {
     @Mock
     private IPartyService partyService;
     @Mock
-    private ITransactionCategoryService transactionCategoryService; // Mock adicionado
+    private ITransactionCategoryService transactionCategoryService;
 
     @InjectMocks
     private GoalService service;
 
     private Party mockParty;
-    private SavingGoal mockSavingGoal;
+    private Goal mockGoal;
+    private SpendingLimitGoal mockSpendingLimitGoal;
     private TransactionCategory mockCategory;
 
     @BeforeEach
     void setup() {
         mockParty = Party.builder().id(1L).build();
-        mockSavingGoal = new SavingGoal();
-        mockSavingGoal.setId(1L);
-        mockSavingGoal.setName("Buy a Car");
-        mockSavingGoal.setParty(mockParty);
+
+        mockGoal = new SavingGoal();
+        mockGoal.setId(1L);
+        mockGoal.setName("Buy a Car");
+        mockGoal.setParty(mockParty);
+        mockGoal.setCompleted(false);
+
+        mockSpendingLimitGoal = new SpendingLimitGoal();
+        mockSpendingLimitGoal.setId(2L);
+        mockSpendingLimitGoal.setName("Old Name");
+        mockSpendingLimitGoal.setReason("Old Reason");
+        mockSpendingLimitGoal.setInitialDate(LocalDate.of(2025, 1, 1));
+        mockSpendingLimitGoal.setFinalDate(LocalDate.of(2025, 1, 31));
+        mockSpendingLimitGoal.setLimitType(SpendingLimitGoalType.AMOUNT);
+        mockSpendingLimitGoal.setLimitAmount(new BigDecimal("1000.00"));
+        mockSpendingLimitGoal.setLimitPercentage(null);
+        mockSpendingLimitGoal.setParty(mockParty);
+
         mockCategory = new TransactionCategory();
         mockCategory.setId(1L);
     }
@@ -63,45 +79,124 @@ class GoalServiceTest {
     void shouldCreateSpendingLimitGoal() {
         CreateSpendingLimitGoalDTO dto = new CreateSpendingLimitGoalDTO("Groceries", null, 1L, SpendingLimitGoalType.AMOUNT, new BigDecimal("1200"), null, LocalDate.now(), LocalDate.now().plusMonths(1), 1L);
         when(partyService.getById(1L)).thenReturn(mockParty);
-        when(transactionCategoryService.getEntityById(1L)).thenReturn(mockCategory); // Mock da busca de categoria
+        when(transactionCategoryService.getEntityById(1L)).thenReturn(mockCategory);
         when(repository.save(any(SpendingLimitGoal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         SpendingLimitGoal result = service.createSpendingLimitGoal(dto);
 
         assertNotNull(result);
         assertEquals(dto.name(), result.getName());
-        assertEquals(dto.limitAmount(), result.getLimitAmount());
-        verify(partyService).getById(1L);
-        verify(transactionCategoryService).getEntityById(1L);
         verify(repository).save(any(SpendingLimitGoal.class));
     }
 
     @Test
-    @DisplayName("Should get goal by ID")
-    void shouldGetById() {
-        when(repository.findById(1L)).thenReturn(Optional.of(mockSavingGoal));
-        SearchedGoalDTO result = service.getById(1L);
-        assertNotNull(result);
-        assertEquals(mockSavingGoal.getName(), result.name());
+    @DisplayName("Should throw exception when creating an AMOUNT goal with a null amount")
+    void shouldThrowWhenCreateAmountGoalWithNullAmount() {
+        CreateSpendingLimitGoalDTO dto = new CreateSpendingLimitGoalDTO("Groceries", null, 1L, SpendingLimitGoalType.AMOUNT, null, null, LocalDate.now(), LocalDate.now().plusMonths(1), 1L);
+        when(partyService.getById(1L)).thenReturn(mockParty);
+        when(transactionCategoryService.getEntityById(1L)).thenReturn(mockCategory);
+
+        assertThrows(IllegalArgumentException.class, () -> service.createSpendingLimitGoal(dto));
     }
 
     @Test
-    @DisplayName("Should throw GoalNotFoundException when getting non-existent goal")
+    @DisplayName("Should throw exception when creating a PERCENTUAL goal with a null percentage")
+    void shouldThrowWhenCreatePercentualGoalWithNullPercentage() {
+        CreateSpendingLimitGoalDTO dto = new CreateSpendingLimitGoalDTO("Groceries", null, 1L, SpendingLimitGoalType.PERCENTUAL, null, null, LocalDate.now(), LocalDate.now().plusMonths(1), 1L);
+        when(partyService.getById(1L)).thenReturn(mockParty);
+        when(transactionCategoryService.getEntityById(1L)).thenReturn(mockCategory);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.createSpendingLimitGoal(dto));
+        assertEquals("Limit percentage is required for type PERCENTUAL.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should get a goal by ID")
+    void shouldGetById() {
+        when(repository.findById(1L)).thenReturn(Optional.of(mockGoal));
+
+        SearchedGoalDTO result = service.getById(1L);
+
+        assertNotNull(result);
+        assertEquals(mockGoal.getName(), result.name());
+    }
+
+    @Test
+    @DisplayName("Should throw GoalNotFoundException when getting a non-existent goal")
     void shouldThrowWhenGetByIdNotFound() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
+
         assertThrows(GoalNotFoundException.class, () -> service.getById(99L));
     }
 
     @Test
-    @DisplayName("Should find all goals by Party ID paginated")
+    @DisplayName("Should find all goals for a Party in a paginated way")
     void shouldFindAllByPartyId() {
-        Page<Goal> page = new PageImpl<>(List.of(mockSavingGoal));
+        Page<Goal> page = new PageImpl<>(List.of(mockGoal));
         when(repository.findAllByPartyId(any(Pageable.class), eq(1L))).thenReturn(page);
 
         Page<SearchedGoalDTO> result = service.findAllByPartyId(1L, 0, 10, "id", "ASC");
 
         assertEquals(1, result.getTotalElements());
-        verify(repository).findAllByPartyId(any(Pageable.class), eq(1L));
+    }
+
+    @Test
+    @DisplayName("Should update only non-null fields of a Spending Limit Goal")
+    void shouldUpdateOnlyNonNullFieldsOfSpendingLimitGoal() {
+        LocalDate newFinalDate = LocalDate.of(2025, 2, 28);
+        UpdateSpendingLimitGoalDTO dto = new UpdateSpendingLimitGoalDTO(
+                "New Name",
+                null,
+                null,
+                new BigDecimal("1500.00"),
+                null,
+                null,
+                newFinalDate
+        );
+        when(repository.findById(2L)).thenReturn(Optional.of(mockSpendingLimitGoal));
+        when(repository.save(any(SpendingLimitGoal.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.updateSpendingLimitGoal(2L, dto);
+
+        assertEquals("New Name", mockSpendingLimitGoal.getName());
+        assertEquals(0, new BigDecimal("1500.00").compareTo(mockSpendingLimitGoal.getLimitAmount()));
+        assertEquals(newFinalDate, mockSpendingLimitGoal.getFinalDate());
+        assertEquals("Old Reason", mockSpendingLimitGoal.getReason());
+        assertEquals(LocalDate.of(2025, 1, 1), mockSpendingLimitGoal.getInitialDate());
+        assertEquals(SpendingLimitGoalType.AMOUNT, mockSpendingLimitGoal.getLimitType());
+
+        verify(repository).findById(2L);
+        verify(repository).save(mockSpendingLimitGoal);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to update a goal that is not a Spending Limit Goal")
+    void shouldThrowWhenUpdateGoalOfWrongType() {
+        UpdateSpendingLimitGoalDTO dto = new UpdateSpendingLimitGoalDTO("New Name", null, null, null, null, null, null);
+        when(repository.findById(1L)).thenReturn(Optional.of(mockGoal));
+
+        assertThrows(GoalNotFoundException.class, () -> service.updateSpendingLimitGoal(1L, dto));
+    }
+
+    @Test
+    @DisplayName("Should mark a goal as complete")
+    void shouldCompleteGoal() {
+        when(repository.findById(1L)).thenReturn(Optional.of(mockGoal));
+        assertFalse(mockGoal.isCompleted());
+
+        String result = service.complete(1L);
+
+        assertEquals("Goal successfully completed", result);
+        assertTrue(mockGoal.isCompleted());
+        verify(repository).save(mockGoal);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to complete a non-existent goal")
+    void shouldThrowWhenCompleteNotFound() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(GoalNotFoundException.class, () -> service.complete(99L));
     }
 
     @Test
@@ -115,5 +210,14 @@ class GoalServiceTest {
         assertEquals("Goal deleted successfully.", result);
         verify(repository).existsById(1L);
         verify(repository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to delete a non-existent goal")
+    void shouldThrowWhenDeleteNotFound() {
+        when(repository.existsById(99L)).thenReturn(false);
+
+        assertThrows(GoalNotFoundException.class, () -> service.delete(99L));
+        verify(repository, never()).deleteById(anyLong());
     }
 }

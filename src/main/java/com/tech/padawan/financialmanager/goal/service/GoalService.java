@@ -103,7 +103,7 @@ public class GoalService implements IGoalService {
                 .orElseThrow(() -> new GoalNotFoundException("Goal with id " + id + " not found."));
         goal.setCompleted(true);
         repository.save(goal);
-        return "Goal sucessfully completed";
+        return "Goal successfully completed";
     };
 
     private SpendingLimitGoal findSpendingLimitGoalById(Long id) {
