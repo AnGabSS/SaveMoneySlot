@@ -59,15 +59,11 @@ class PartyServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Since the service's constructor fetches the levels, we need to mock this call.
         partyLevels = List.of(new PartyLevel(1L, "Basic", LocalDateTime.now(), 0, 10000));
         when(partyLevelRepository.findAll()).thenReturn(partyLevels);
 
-        // Re-initialize the service to ensure the levels list is loaded from the mock
         partyService = new PartyService(partyRepository, championService, partyLevelRepository);
 
-        // --- UPDATED SECTION ---
-        // 1. Create a User instance first
         user = User.builder()
                 .id(10L)
                 .name("Test User")
@@ -75,21 +71,18 @@ class PartyServiceTest {
                 .birthdate(LocalDate.now())
                 .build();
 
-        // 2. Create the Champion and associate the User with it
         champion = Champion.builder()
                 .id(1L)
                 .nickname("Ashe")
-                .user(user) // Correctly setting the User object
+                .user(user)
                 .build();
 
-        // 3. (Optional but good practice) Set the champion back on the user for bidirectional consistency
         user.setChampion(champion);
 
-        // 4. Create the Party using the fully initialized Champion
         party = Party.builder()
                 .id(1L)
                 .name("Frost Archers")
-                .champions(new ArrayList<>(List.of(champion))) // Use ArrayList to allow modifications
+                .champions(new ArrayList<>(List.of(champion)))
                 .balance(BigDecimal.ZERO)
                 .points(0)
                 .createdAt(LocalDateTime.now())
@@ -99,18 +92,15 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should find and return all parties for a user in a paginated way")
     void findAllByUserId_shouldReturnPagedParties() {
-        // Arrange
-        Long userId = 10L; // This ID now matches our created user's ID
+        Long userId = 10L;
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.ASC, "name");
         Page<Party> partyPage = new PageImpl<>(List.of(party));
 
         when(championService.getByUserId(userId)).thenReturn(champion);
         when(partyRepository.findAllByChampionsIdAndNameContainingIgnoreCase(pageRequest, champion.getId(), "")).thenReturn(partyPage);
 
-        // Act
         Page<SearchedPartyDTO> result = partyService.findAllByUserId(userId, "", 1, 10, "name", "ASC");
 
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertEquals("Frost Archers", result.getContent().get(0).name());
@@ -121,13 +111,10 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should return a party by its ID")
     void getById_shouldReturnParty_whenIdExists() {
-        // Arrange
         when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
 
-        // Act
         Party foundParty = partyService.getById(1L);
 
-        // Assert
         assertNotNull(foundParty);
         assertEquals(party.getId(), foundParty.getId());
         verify(partyRepository).findById(1L);
@@ -136,10 +123,8 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should throw PartyNotFoundException when ID does not exist")
     void getById_shouldThrowException_whenIdDoesNotExist() {
-        // Arrange
         when(partyRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(PartyNotFoundException.class, () -> partyService.getById(99L));
         verify(partyRepository).findById(99L);
     }
@@ -147,13 +132,10 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should return a formatted party (DTO) by its ID")
     void getByIdFormatted_shouldReturnDTO_whenIdExists() {
-        // Arrange
         when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
 
-        // Act
         SearchedPartyDTO result = partyService.getByIdFormatted(1L);
 
-        // Assert
         assertNotNull(result);
         assertEquals(party.getName(), result.name());
         verify(partyRepository).findById(1L);
@@ -162,15 +144,12 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should create a new party successfully")
     void create_shouldCreateAndReturnParty() {
-        // Arrange
         CreateUpdatePartyDTO dto = new CreateUpdatePartyDTO("New Party");
         when(championService.getById(1L)).thenReturn(champion);
         when(partyRepository.save(any(Party.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Act
         Party createdParty = partyService.create(1L, dto);
 
-        // Assert
         assertNotNull(createdParty);
         assertEquals("New Party", createdParty.getName());
         assertTrue(createdParty.getChampions().contains(champion));
@@ -182,15 +161,12 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should update the name of an existing party")
     void update_shouldUpdatePartyName() {
-        // Arrange
         CreateUpdatePartyDTO dto = new CreateUpdatePartyDTO("Updated Frost Archers");
         when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
         when(partyRepository.save(any(Party.class))).thenReturn(party);
 
-        // Act
         SearchedPartyDTO updatedPartyDTO = partyService.update(1L, dto);
 
-        // Assert
         assertNotNull(updatedPartyDTO);
         assertEquals("Updated Frost Archers", updatedPartyDTO.name());
         verify(partyRepository).findById(1L);
@@ -200,7 +176,6 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should add a new champion to a party")
     void addChampion_shouldAddChampionToParty() {
-        // Arrange
         User anotherUser = User.builder().id(11L).name("Another User").build();
         Champion newChampion = Champion.builder().id(2L).nickname("Jinx").user(anotherUser).build();
         ChangeChampionInPartyDTO dto = new ChangeChampionInPartyDTO("Jinx");
@@ -209,10 +184,8 @@ class PartyServiceTest {
         when(championService.getByNickname("Jinx")).thenReturn(newChampion);
         when(partyRepository.save(any(Party.class))).thenReturn(party);
 
-        // Act
         SearchedPartyDTO result = partyService.addChampion(1L, dto);
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.champions().size());
         assertTrue(party.getChampions().contains(newChampion));
@@ -224,12 +197,10 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should throw ChampionAlreadyInThePartyException when trying to add a champion that is already in the party")
     void addChampion_shouldThrowException_whenChampionIsAlreadyInParty() {
-        // Arrange
         ChangeChampionInPartyDTO dto = new ChangeChampionInPartyDTO("Ashe");
         when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
         when(championService.getByNickname("Ashe")).thenReturn(champion);
 
-        // Act & Assert
         assertThrows(ChampionAlreadyInThePartyException.class, () -> partyService.addChampion(1L, dto));
         verify(partyRepository, never()).save(any(Party.class));
     }
@@ -237,7 +208,6 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should remove a champion from a party")
     void removeChampion_shouldRemoveChampionFromParty() {
-        // Arrange
         Champion championToRemove = champion;
         ChangeChampionInPartyDTO dto = new ChangeChampionInPartyDTO("Ashe");
 
@@ -247,10 +217,8 @@ class PartyServiceTest {
 
         assertTrue(party.getChampions().contains(championToRemove));
 
-        // Act
         SearchedPartyDTO result = partyService.removeChampion(1L, dto);
 
-        // Assert
         assertNotNull(result);
         assertEquals(0, result.champions().size());
         assertFalse(party.getChampions().contains(championToRemove));
@@ -262,14 +230,11 @@ class PartyServiceTest {
     @Test
     @DisplayName("Should delete a party successfully")
     void delete_shouldDeletePartyAndReturnMessage() {
-        // Arrange
         when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
         doNothing().when(partyRepository).deleteById(1L);
 
-        // Act
         String resultMessage = partyService.delete(1L);
 
-        // Assert
         assertEquals("Party deleted", resultMessage);
         verify(partyRepository).findById(1L);
         verify(partyRepository).deleteById(1L);
