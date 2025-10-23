@@ -21,7 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/v1/transaction/category")
+@RequestMapping("/api/v1/transaction-category")
 @Tag(
         name = "Transaction Categories",
         description = "Responsible for defining the different types of transactions, such as an expense with a car or money received from a freelance job."
@@ -30,11 +30,9 @@ public class TransactionCategoryController {
 
 
     private final ITransactionCategoryService service;
-    private final JwtTokenService tokenService;
 
-    public TransactionCategoryController(ITransactionCategoryService service, JwtTokenService tokenService ){
+    public TransactionCategoryController(ITransactionCategoryService service){
         this.service = service;
-        this.tokenService = tokenService;
     }
 
     @Operation(
@@ -58,10 +56,10 @@ public class TransactionCategoryController {
                     )
             }
     )
-    @GetMapping
+    @GetMapping("/find-by-id/{id}")
     public ResponseEntity<Page<SearchedTransactionCategoryDTO>> findAll(
-            @Parameter(description = "Authentication JWT token. Must be prefixed with 'Bearer '.", required = true, example = "Bearer eyJhbGciOiJIUzI1NiJ9...")
-            @RequestHeader("Authorization") String authorizationHeader,
+            @Parameter(description = "ID of the party.", required = true, example = "1")
+            @PathVariable Long id,
 
             @Parameter(description = "The page number to retrieve, starting in page number 1.", example = "1")
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -75,9 +73,7 @@ public class TransactionCategoryController {
             @Parameter(description = "The sort direction ('ASC' for ascending, 'DESC' for descending).", schema = @Schema(type = "string", allowableValues = {"ASC", "DESC"}))
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ) {
-        String jwtToken = authorizationHeader.substring(7);
-        Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
-        return ResponseEntity.ok(service.findAllByUserId(id, page, size, orderBy, direction));
+        return ResponseEntity.ok(service.findAllByPartyId(id, page, size, orderBy, direction));
     }
 
     @Operation(
@@ -132,9 +128,7 @@ public class TransactionCategoryController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody @Valid CreateTransactionCategoryDTO categoryDTO
     ) {
-            String jwtToken = authorizationHeader.substring(7);
-            Long id = Long.parseLong(tokenService.getSubjectFromToken(jwtToken));
-            TransactionCategory category = service.create(id, categoryDTO);
+            TransactionCategory category = service.create(categoryDTO);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(category.getId()).toUri();
             return ResponseEntity.created(uri).body(SearchedTransactionCategoryDTO.from(category));
     }

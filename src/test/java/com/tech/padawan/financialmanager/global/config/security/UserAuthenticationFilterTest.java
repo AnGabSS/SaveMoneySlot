@@ -66,7 +66,7 @@ class UserAuthenticationFilterTest {
     @DisplayName("Should allow public endpoints without authentication")
     void shouldAllowPublicEndpoints() throws Exception {
         when(request.getMethod()).thenReturn("GET");
-        when(request.getServletPath()).thenReturn("/users/login"); // ajuste para um endpoint que esteja em SecurityConfiguration.PUBLIC_ENDPOINTS
+        when(request.getServletPath()).thenReturn("/api/v1/auth");
 
         StringWriter responseWriter = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(responseWriter));

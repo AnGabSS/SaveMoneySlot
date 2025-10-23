@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfiguration implements WebMvcConfigurer {
-    private String FRONT_URL;
+    private final String FRONT_URL;
 
     public CorsConfiguration(SaveMoneySlotConfiguration configuration){
         this.FRONT_URL = configuration.front_url();

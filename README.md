@@ -9,12 +9,15 @@
 
 ## 🎯 Funcionalidades | Features
 
-- Rastreamento de despesas e receitas | Expense and income tracking  
-- Criação e controle de Metas | Goals creation and control  
-- Visualização de hábitos de consumo | Spending habit insights  
-- Sistema de autenticação com JWT | JWT authentication system  
-- Migrações de banco com Flyway | Database migrations with Flyway  
-- Documentação automática com OpenAPI | API documentation with OpenAPI  
+- Rastreamento de **despesas** e **receitas** | **Expense** and **income** tracking
+- Criação e controle de **Metas** (de Economia e Limite de Gastos) | Creation and control of **Goals** (Saving and Spending Limit)
+- Criação de grupos **(Parties)** para que usuários, familiares/amigos ou colegas de trabalho possam se ajudar e ter um overview de seus gastos em conjunto. | Creation of groups **(Parties)** for users, family/friends, or coworkers to help each other and have a joint spending overview.
+- Sistema de gamificação com pontos por metas concluídas | Gamification system with points for completed goals
+- Visualização de hábitos de consumo | Spending habit insights
+- Sistema de autenticação com JWT | JWT authentication system
+- Migrações de banco com Flyway | Database migrations with Flyway
+- Documentação da API com OpenAPI | API documentation with OpenAPI
+
 
 ---
 
@@ -54,7 +57,7 @@ testImplementation 'org.springframework.security:spring-security-test'
 
 ### 📊 Cobertura de Testes | Test Coverage
 
-**Cobertura Atual: 71%** \
+**Cobertura Atual: 61%** \
 \
 O projeto utiliza **[JaCoCo](https://www.jacoco.org/jacoco/)** para gerar relatórios de cobertura de testes.
 Você pode visualizar o html pelo caminho:

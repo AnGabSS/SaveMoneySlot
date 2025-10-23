@@ -23,9 +23,10 @@ public class Champion {
     private Long id;
 
     @NotBlank(message = "Nickname is required")
+    @Column(unique = true)
     private String nickname;
 
-    @NotNull(message = "PointsNeeded is required")
+    @NotNull(message = "Points is required")
     @Min(value = 0, message = "Value be a negative number")
     private int points;
 

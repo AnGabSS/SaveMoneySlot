@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateTransactionCategoryDTO(
+        @NotNull(message = "partyId is required")
+        Long partyId,
         @NotNull(message = "Name is required")
         String name,
         @NotNull(message = "Type is required")

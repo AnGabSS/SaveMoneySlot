@@ -35,8 +35,8 @@ public class SecurityConfiguration {
     private final String FRONT_URL;
 
     public static final String[] PUBLIC_ENDPOINTS = {
-            "/users/login",
-            "/users",
+            "/api/v1/users",
+            "/api/v1/auth",
             "/swagger-ui.html",
             "/swagger-ui/**",
             "/v3/api-docs/**",

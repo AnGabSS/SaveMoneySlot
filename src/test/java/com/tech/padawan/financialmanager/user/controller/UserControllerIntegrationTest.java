@@ -64,7 +64,6 @@ class UserControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("David Bowie"))
                 .andExpect(jsonPath("$.email").value("david@bowie.com.us"))
-                .andExpect(jsonPath("$.balance").value(0))
                 .andReturn();
 
         String responseJson = result.getResponse().getContentAsString();
@@ -88,7 +87,7 @@ class UserControllerIntegrationTest {
     @Order(3)
     @DisplayName("Get user by ID")
     void shouldGetUserById() throws Exception {
-        mockMvc.perform(get("/api/v1/users/" + createdUserId)
+        mockMvc.perform(get("/api/v1/users/find-by-id/" + createdUserId)
                         .header("Authorization", bearer()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(createdUserId))
@@ -125,7 +124,7 @@ class UserControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("User deleted"));
 
-        mockMvc.perform(get("/api/v1/users/" + createdUserId)
+        mockMvc.perform(get("/api/v1/users/find-by-id/" + createdUserId)
                         .header("Authorization", bearer()))
                 .andExpect(status().isNotFound());
     }

@@ -1,59 +1,48 @@
 package com.tech.padawan.financialmanager.goal.model;
 
-import com.tech.padawan.financialmanager.user.model.User;
-import jakarta.annotation.Nullable;
+import com.tech.padawan.financialmanager.party.model.Party;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "goals")
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
-public class Goal {
+public abstract class Goal {
 
-    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @NotBlank(message = "Name is required")
     private String name;
-    @NotNull(message = "Target Amount is required")
-    @Min(value = 0, message = "Target cannot be a negative number")
-    private BigDecimal targetAmount;
-    @NotNull(message = "Saved Amount is required")
-    private BigDecimal savedAmount;
-    @Nullable
+
     private String reason;
-    @Nullable
-    private Date deadline;
-    @ColumnDefault("false")
+
     private boolean isCompleted;
-    private Date createdAt;
-    private Date updatedAt;
-    @ManyToOne
-    @NotNull(message = "User is required")
-    private User user;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "party_id")
+    @NotNull(message = "Party is required")
+    private Party party;
 
     @PrePersist
-    protected void onCreate(){
-        this.createdAt = new Date();
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    protected void onUpdate(){
-        this.updatedAt = new Date();
-        this.isCompleted = this.savedAmount.compareTo(this.targetAmount) >= 0;
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
-
-
 }

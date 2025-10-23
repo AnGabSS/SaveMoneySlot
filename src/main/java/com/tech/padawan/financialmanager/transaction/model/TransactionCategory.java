@@ -1,5 +1,6 @@
 package com.tech.padawan.financialmanager.transaction.model;
 
+import com.tech.padawan.financialmanager.party.model.Party;
 import com.tech.padawan.financialmanager.user.model.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -22,7 +23,8 @@ public class TransactionCategory {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Type is required")
     private TransactionType type;
+
     @ManyToOne
-    @NotNull(message = "User is required")
-    private User user;
+    @NotNull(message = "Party is required")
+    private Party party;
 }

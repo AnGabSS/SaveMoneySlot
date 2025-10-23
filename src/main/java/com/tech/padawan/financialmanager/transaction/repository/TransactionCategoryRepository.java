@@ -6,6 +6,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TransactionCategoryRepository extends JpaRepository<TransactionCategory, Long> {
-    Page<TransactionCategory> findAllByUserId(Pageable pageable, Long userId);
-    Page<TransactionCategory> findAllByUserEmail(Pageable pageable, String email);
+    Page<TransactionCategory> findAllByPartyId(Pageable pageable, Long PageId);
 }

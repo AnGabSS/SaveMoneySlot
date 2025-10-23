@@ -4,12 +4,14 @@ import com.tech.padawan.financialmanager.report.dto.SavedMoneyByMonth;
 import com.tech.padawan.financialmanager.report.dto.TransactionCountByCategoryDTO;
 import com.tech.padawan.financialmanager.report.dto.TransactionCountByTypeDTO;
 import com.tech.padawan.financialmanager.transaction.model.Transaction;
+import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
 import com.tech.padawan.financialmanager.transaction.model.TransactionType;
 import com.tech.padawan.financialmanager.transaction.service.ITransactionService;
 import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -27,7 +29,7 @@ public class ReportService implements IReportService {
 
     @Override
     public List<SavedMoneyByMonth> getSavedMoneyByMonth(Long id, LocalDateTime initialDate, LocalDateTime finalDate) {
-        List<Transaction> transactions = transactionService.findAllByUserIdAndMonth(id, initialDate, finalDate);
+        List<Transaction> transactions = transactionService.findAllByPartyIdAndMonth(id, initialDate, finalDate);
 
         Map<YearMonth, BigDecimal> savedMoneyByMonthMap = transactions.stream()
                 .collect(Collectors.groupingBy(
@@ -59,7 +61,7 @@ public class ReportService implements IReportService {
         LocalDateTime firstDayOfMonth = yearMonth.atDay(1).atStartOfDay();
         LocalDateTime lastDayOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
 
-        List<Transaction> transactions = transactionService.findAllByUserIdAndMonth(id, firstDayOfMonth, lastDayOfMonth);
+        List<Transaction> transactions = transactionService.findAllByPartyIdAndMonth(id, firstDayOfMonth, lastDayOfMonth);
 
         Map<TransactionType, Map<String, BigDecimal>> groupedAmounts = transactions.stream()
                 .collect(Collectors.groupingBy(
@@ -89,5 +91,45 @@ public class ReportService implements IReportService {
                     return new TransactionCountByTypeDTO(type, categoryList);
                 })
                 .toList();
+    }
+
+    @Override
+    public BigDecimal getTheMonthlyAverageValuesByType(Long partyId, TransactionType type) {
+        List<Transaction> transactions = transactionService.findAllByPartyIdAndType(partyId, type);
+        if (transactions.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        Map<YearMonth, BigDecimal> monthlyTotals = transactions.stream()
+                .collect(Collectors.groupingBy(
+                        transaction -> YearMonth.from(transaction.getCreatedAt()),
+                        Collectors.mapping(
+                                Transaction::getValue,
+                                Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)
+                        )
+                ));
+
+        Collection<BigDecimal> monthlySums = monthlyTotals.values();
+        BigDecimal totalOfMonthlySums = monthlySums.stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        int numberOfMonths = monthlySums.size();
+        return totalOfMonthlySums.divide(new BigDecimal(numberOfMonths), 2, RoundingMode.HALF_UP);
+    }
+
+    @Override
+    public BigDecimal getTheTotalValuesByTypeBetweenDate(Long partyId, LocalDateTime initialDate, LocalDateTime finalDate, TransactionType type) {
+        List<Transaction> transactions = transactionService.findAllByPartyIdAndMonthAndType(partyId, initialDate, finalDate, type);
+        return transactions
+                .stream()
+                .map(Transaction::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    public BigDecimal getTheTotalValuesByCategoryBetweenDate(Long partyId, LocalDateTime initialDate, LocalDateTime finalDate, TransactionCategory category) {
+        List<Transaction> transactions = transactionService.findAllByPartyIdAndMonthAndCategory(partyId, initialDate, finalDate, category);
+        return transactions
+                .stream()
+                .map(Transaction::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

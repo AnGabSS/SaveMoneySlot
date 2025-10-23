@@ -10,10 +10,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name="champions_levels")
+@Table(name="champion_levels")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,7 +28,17 @@ public class ChampionLevel {
     @NotBlank(message = "title is required")
     private String title;
 
+    private LocalDateTime createdAt;
+
     @NotNull(message = "PointsNeeded is required")
     @ColumnDefault("0")
     private int pointsNeeded;
+
+    @NotNull(message = "PointsMax is required")
+    @ColumnDefault("0")
+    private int pointsMax;
+
+    public boolean pointsIsEnough(Integer points){
+        return this.pointsNeeded <= points && this.pointsMax >= points;
+    }
 }

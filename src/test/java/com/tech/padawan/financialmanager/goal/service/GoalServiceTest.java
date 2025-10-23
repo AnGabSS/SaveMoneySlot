@@ -1,188 +1,119 @@
 package com.tech.padawan.financialmanager.goal.service;
 
-import com.tech.padawan.financialmanager.goal.dto.CreateGoalDTO;
+import com.tech.padawan.financialmanager.goal.dto.CreateSpendingLimitGoalDTO;
 import com.tech.padawan.financialmanager.goal.dto.SearchedGoalDTO;
-import com.tech.padawan.financialmanager.goal.dto.UpdateGoalDTO;
-import com.tech.padawan.financialmanager.goal.model.Goal;
+import com.tech.padawan.financialmanager.goal.model.*;
 import com.tech.padawan.financialmanager.goal.repository.GoalRepository;
 import com.tech.padawan.financialmanager.goal.service.exception.GoalNotFoundException;
-import com.tech.padawan.financialmanager.user.model.User;
-import com.tech.padawan.financialmanager.user.service.IUserService;
+import com.tech.padawan.financialmanager.party.model.Party;
+import com.tech.padawan.financialmanager.party.service.IPartyService;
+import com.tech.padawan.financialmanager.transaction.model.TransactionCategory;
+import com.tech.padawan.financialmanager.transaction.service.ITransactionCategoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-import org.springframework.data.domain.*;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class) // Forma moderna de inicializar mocks
 class GoalServiceTest {
 
     @Mock
     private GoalRepository repository;
-
     @Mock
-    private IUserService userService;
+    private IPartyService partyService;
+    @Mock
+    private ITransactionCategoryService transactionCategoryService; // Mock adicionado
 
     @InjectMocks
     private GoalService service;
 
-    private User mockUser;
-    private Goal mockGoal;
+    private Party mockParty;
+    private SavingGoal mockSavingGoal;
+    private TransactionCategory mockCategory;
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-        mockUser = User.builder().id(1L).name("User Test").build();
-
-        mockGoal = Goal.builder()
-                .id(1L)
-                .name("Buy a Car")
-                .targetAmount(BigDecimal.valueOf(10000.0))
-                .savedAmount(BigDecimal.valueOf(2500.0))
-                .reason("Mobility")
-                .deadline(new Date())
-                .user(mockUser)
-                .build();
+        mockParty = Party.builder().id(1L).build();
+        mockSavingGoal = new SavingGoal();
+        mockSavingGoal.setId(1L);
+        mockSavingGoal.setName("Buy a Car");
+        mockSavingGoal.setParty(mockParty);
+        mockCategory = new TransactionCategory();
+        mockCategory.setId(1L);
     }
 
     @Test
-    @DisplayName("Should return all goals paginated")
-    void findAll() {
-        Page<Goal> page = new PageImpl<>(List.of(mockGoal));
-        when(repository.findAll(any(PageRequest.class))).thenReturn(page);
+    @DisplayName("Should create a Spending Limit Goal successfully")
+    void shouldCreateSpendingLimitGoal() {
+        CreateSpendingLimitGoalDTO dto = new CreateSpendingLimitGoalDTO("Groceries", null, 1L, SpendingLimitGoalType.AMOUNT, new BigDecimal("1200"), null, LocalDate.now(), LocalDate.now().plusMonths(1), 1L);
+        when(partyService.getById(1L)).thenReturn(mockParty);
+        when(transactionCategoryService.getEntityById(1L)).thenReturn(mockCategory); // Mock da busca de categoria
+        when(repository.save(any(SpendingLimitGoal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Page<SearchedGoalDTO> result = service.findAll(1, 10, "id", "ASC");
+        SpendingLimitGoal result = service.createSpendingLimitGoal(dto);
+
+        assertNotNull(result);
+        assertEquals(dto.name(), result.getName());
+        assertEquals(dto.limitAmount(), result.getLimitAmount());
+        verify(partyService).getById(1L);
+        verify(transactionCategoryService).getEntityById(1L);
+        verify(repository).save(any(SpendingLimitGoal.class));
+    }
+
+    @Test
+    @DisplayName("Should get goal by ID")
+    void shouldGetById() {
+        when(repository.findById(1L)).thenReturn(Optional.of(mockSavingGoal));
+        SearchedGoalDTO result = service.getById(1L);
+        assertNotNull(result);
+        assertEquals(mockSavingGoal.getName(), result.name());
+    }
+
+    @Test
+    @DisplayName("Should throw GoalNotFoundException when getting non-existent goal")
+    void shouldThrowWhenGetByIdNotFound() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(GoalNotFoundException.class, () -> service.getById(99L));
+    }
+
+    @Test
+    @DisplayName("Should find all goals by Party ID paginated")
+    void shouldFindAllByPartyId() {
+        Page<Goal> page = new PageImpl<>(List.of(mockSavingGoal));
+        when(repository.findAllByPartyId(any(Pageable.class), eq(1L))).thenReturn(page);
+
+        Page<SearchedGoalDTO> result = service.findAllByPartyId(1L, 0, 10, "id", "ASC");
 
         assertEquals(1, result.getTotalElements());
-        verify(repository, times(1)).findAll(any(PageRequest.class));
+        verify(repository).findAllByPartyId(any(Pageable.class), eq(1L));
     }
 
     @Test
-    @DisplayName("Should return goal by ID")
-    void getById() {
-        when(repository.findById(1L)).thenReturn(Optional.of(mockGoal));
-
-        SearchedGoalDTO dto = service.getById(1L);
-
-        assertEquals(mockGoal.getName(), dto.name());
-        verify(repository, times(1)).findById(1L);
-    }
-
-    @Test
-    @DisplayName("Should throw exception when goal not found")
-    void getById_NotFound() {
-        when(repository.findById(2L)).thenReturn(Optional.empty());
-
-        assertThrows(GoalNotFoundException.class, () -> service.getById(2L));
-    }
-
-    @Test
-    @DisplayName("Should create a goal")
-    void create() {
-        CreateGoalDTO dto = new CreateGoalDTO(
-                "Buy a Car", BigDecimal.valueOf(10000.0), BigDecimal.valueOf(2500.0), "Mobility", new Date(), 1L
-        );
-
-        when(userService.getUserEntityById(1L)).thenReturn(mockUser);
-        when(repository.save(any(Goal.class))).thenReturn(mockGoal);
-
-        Goal created = service.create(dto);
-
-        assertEquals(dto.name(), created.getName());
-        verify(userService).getUserEntityById(1L);
-        verify(repository).save(any(Goal.class));
-    }
-
-    @Test
-    @DisplayName("Should update a goal")
-    void update() {
-        UpdateGoalDTO dto = new UpdateGoalDTO(
-                "Buy House", BigDecimal.valueOf(200000.0), BigDecimal.valueOf(10000.0), "Investment", new Date()
-        );
-
-        when(repository.findById(1L)).thenReturn(Optional.of(mockGoal));
-        when(repository.save(any(Goal.class))).thenReturn(mockGoal);
-
-        SearchedGoalDTO result = service.update(1L, dto);
-
-        assertEquals(dto.name(), result.name());
-        verify(repository).save(any(Goal.class));
-    }
-
-    @Test
-    @DisplayName("Should Throw GoalNotFoundException when goal not found on update")
-    void shouldThrowWhenGoalNotFoundOnUpdate() {
-        // Arrange
-        Long id = 1L;
-        UpdateGoalDTO dto = new UpdateGoalDTO("name", BigDecimal.valueOf(100.0), BigDecimal.valueOf(50.0), "reason", new Date());
-
-        when(repository.findById(id)).thenReturn(Optional.empty());
-
-        // Act + Assert
-        assertThrows(GoalNotFoundException.class, () -> service.update(id, dto));
-
-        verify(repository, times(1)).findById(id);
-        verify(repository, never()).save(any());
-    }
-
-
-    @Test
-    @DisplayName("Should return goals by user ID paginated")
-    void findAllByUserId() {
-        Page<Goal> page = new PageImpl<>(List.of(mockGoal));
-        when(repository.findAllByUserId(any(Pageable.class), eq(1L))).thenReturn(page);
-
-        Page<SearchedGoalDTO> result = service.findAllByUserId(1L, 1, 10, "id", "ASC");
-
-        assertEquals(1, result.getTotalElements());
-        verify(repository).findAllByUserId(any(Pageable.class), eq(1L));
-    }
-
-    @Test
-    @DisplayName("Should delete goal by ID")
-    void delete() {
-        when(repository.findById(1L)).thenReturn(Optional.of(mockGoal));
+    @DisplayName("Should delete a goal by ID")
+    void shouldDeleteGoal() {
+        when(repository.existsById(1L)).thenReturn(true);
+        doNothing().when(repository).deleteById(1L);
 
         String result = service.delete(1L);
 
-        assertEquals("Goal deleted", result);
+        assertEquals("Goal deleted successfully.", result);
+        verify(repository).existsById(1L);
         verify(repository).deleteById(1L);
     }
-
-    @Test
-    @DisplayName("Should update only saved amount")
-    void updateSaveAmount() {
-        when(repository.findById(1L)).thenReturn(Optional.of(mockGoal));
-        when(repository.save(any(Goal.class))).thenReturn(mockGoal);
-        SearchedGoalDTO dto = service.updateSaveAmount(1L, BigDecimal.valueOf(5000.0));
-
-        verify(repository).findById(1L);
-        assertEquals(BigDecimal.valueOf(5000.0), dto.savedAmount());
-        verify(repository).save(any(Goal.class));
-    }
-
-    @Test
-    @DisplayName("Should Throw GoalNotFoundException when goal not found on update saved amount")
-    void shouldThrowWhenGoalNotFoundOnUpdateSavedAmount() {
-        Long id = 1L;
-
-        when(repository.findById(id)).thenReturn(Optional.empty());
-
-        assertThrows(GoalNotFoundException.class, () -> service.updateSaveAmount(id, BigDecimal.valueOf(200.0)));
-
-        verify(repository, times(1)).findById(id);
-        verify(repository, never()).save(any());
-    }
-
 }

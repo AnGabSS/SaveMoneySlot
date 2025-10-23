@@ -1,5 +1,7 @@
 package com.tech.padawan.financialmanager.transaction.service;
 
+import com.tech.padawan.financialmanager.party.model.Party;
+import com.tech.padawan.financialmanager.party.service.IPartyService;
 import com.tech.padawan.financialmanager.transaction.dto.CreateTransactionCategoryDTO;
 import com.tech.padawan.financialmanager.transaction.dto.SearchedTransactionCategoryDTO;
 import com.tech.padawan.financialmanager.transaction.dto.UpdateTransactionCategoryDTO;
@@ -18,16 +20,15 @@ import java.util.Optional;
 @Service
 public class TransactionCategoryService implements ITransactionCategoryService{
     private final TransactionCategoryRepository repository;
-    private final IUserService userService;
+    private final IPartyService partyService;
 
 
     public TransactionCategoryService(
             TransactionCategoryRepository repository,
-            IUserService userService
-
+            IPartyService partyService
     ) {
         this.repository = repository;
-        this.userService = userService;
+        this.partyService = partyService;
 
     }
 
@@ -39,9 +40,9 @@ public class TransactionCategoryService implements ITransactionCategoryService{
     }
 
     @Override
-    public Page<SearchedTransactionCategoryDTO> findAllByUserId(Long id, int page, int size, String orderBy, String direction) {
+    public Page<SearchedTransactionCategoryDTO> findAllByPartyId(Long id, int page, int size, String orderBy, String direction) {
         PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.valueOf(direction), orderBy);
-        Page<TransactionCategory> list = repository.findAllByUserId(pageRequest, id);
+        Page<TransactionCategory> list = repository.findAllByPartyId(pageRequest, id);
         return list.map(SearchedTransactionCategoryDTO::from);
     }
 
@@ -52,12 +53,12 @@ public class TransactionCategoryService implements ITransactionCategoryService{
     }
 
     @Override
-    public TransactionCategory create(Long userId, CreateTransactionCategoryDTO transactionDTO) {
-        User user = userService.getUserEntityById(userId);
+    public TransactionCategory create(CreateTransactionCategoryDTO transactionDTO) {
+        Party party = partyService.getById(transactionDTO.partyId());
         TransactionCategory category = TransactionCategory.builder()
                 .name(transactionDTO.name())
                 .type(transactionDTO.type())
-                .user(user)
+                .party(party)
                 .build();
 
         return repository.save(category);

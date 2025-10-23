@@ -9,26 +9,25 @@ public record SearchedTransactionCategoryDTO(
         Long id,
         String name,
         TransactionType type,
-        String user
+        String party
 ) {
 
     public static SearchedTransactionCategoryDTO from(TransactionCategory category) {
         return from(category, true);
     }
 
-    public static SearchedTransactionCategoryDTO from(TransactionCategory category, boolean includeUserUrl) {
-        Long userId = category.getUser() != null ? category.getUser().getId() : null;
+    public static SearchedTransactionCategoryDTO from(TransactionCategory category, boolean includePartyUrl) {
+        Long partyId = category.getParty() != null ? category.getParty().getId() : null;
 
-        String userUrl = null;
-        if (includeUserUrl && userId != null) {
+        String partyUrl = null;
+        if (includePartyUrl && partyId != null) {
             try {
-                userUrl = ServletUriComponentsBuilder
+                partyUrl = ServletUriComponentsBuilder
                         .fromCurrentContextPath()
-                        .path("/user/{id}")
-                        .buildAndExpand(userId)
+                        .path("/party/{id}")
+                        .buildAndExpand(partyId)
                         .toUriString();
-            } catch (IllegalStateException e) {
-                userUrl = null;
+            } catch (IllegalStateException ignored) {
             }
         }
 
@@ -36,7 +35,7 @@ public record SearchedTransactionCategoryDTO(
                 category.getId(),
                 category.getName(),
                 category.getType(),
-                userUrl
+                partyUrl
         );
     }
 

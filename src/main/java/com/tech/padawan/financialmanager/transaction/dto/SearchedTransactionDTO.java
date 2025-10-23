@@ -15,26 +15,25 @@ public record SearchedTransactionDTO(
         BigDecimal value,
         SearchedTransactionCategoryDTO category,
         LocalDateTime createdAt,
-        String user
+        String party
 ) {
 
     public static SearchedTransactionDTO from(Transaction transaction) {
         return from(transaction, true);
     }
 
-    public static SearchedTransactionDTO from(Transaction transaction, boolean includeUserUrl) {
-        Long userId = transaction.getUser() != null ? transaction.getUser().getId() : null;
+    public static SearchedTransactionDTO from(Transaction transaction, boolean includePartyUrl) {
+        Long partyId = transaction.getParty() != null ? transaction.getParty().getId() : null;
 
-        String userUrl = null;
-        if (includeUserUrl && userId != null) {
+        String partyUrl = null;
+        if (includePartyUrl && partyId != null) {
             try {
-                userUrl = ServletUriComponentsBuilder
+                partyUrl = ServletUriComponentsBuilder
                         .fromCurrentContextPath()
-                        .path("/user/{id}")
-                        .buildAndExpand(userId)
+                        .path("/party/{id}")
+                        .buildAndExpand(partyId)
                         .toUriString();
-            } catch (IllegalStateException e) {
-                userUrl = null;
+            } catch (IllegalStateException ignored) {
             }
         }
 
@@ -45,7 +44,7 @@ public record SearchedTransactionDTO(
                 transaction.getValue(),
                 SearchedTransactionCategoryDTO.from(transaction.getCategory()),
                 transaction.getCreatedAt(),
-                userUrl
+                partyUrl
         );
     }
 }
